@@ -1,0 +1,59 @@
+<section class="catalogo" id="cortes">
+
+  <div class="section-header">
+
+    <span>NUESTROS SERVICIOS</span>
+
+    <h2>Encuentra tu estilo</h2>
+
+    <p>
+      Conoce algunos de nuestros cortes y servicios.
+    </p>
+
+  </div>
+
+
+  <div class="cortes-grid">
+
+    @for (corte of cortes; track corte.id) {
+
+      <article class="corte-card">
+
+        <div class="imagen-container">
+
+          <img
+            [src]="corte.imagen"
+            [alt]="corte.nombre"
+          >
+
+        </div>
+
+        <div class="corte-info">
+
+          <div class="corte-header">
+
+            <h3>{{ corte.nombre }}</h3>
+
+            <span class="precio">
+              ${{ corte.precio }}
+            </span>
+
+          </div>
+
+          <p>
+            {{ corte.descripcion }}
+          </p>
+
+          <a href="#reservas">
+            Reservar
+          </a>
+
+        </div>
+
+      </article>
+
+    }
+
+  </div>
+
+</section>
