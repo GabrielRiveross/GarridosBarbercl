@@ -7,23 +7,22 @@ export default {
     }
   ) {
 
-    const url =
-      new URL(request.url);
+    const url = new URL(request.url);
 
-    if (
-      url.pathname === '/api/test'
-    ) {
+    // Permite comprobar qué versión
+    // del Worker está desplegada
+    if (url.pathname === '/api/test') {
 
       return Response.json({
         ok: true,
+        version: 2,
         mensaje:
-          'API de Garridos Barber funcionando'
+          'Worker actualizado funcionando'
       });
     }
 
-    if (
-      url.pathname === '/api/test-db'
-    ) {
+    // Prueba de D1
+    if (url.pathname === '/api/test-db') {
 
       try {
 
@@ -37,7 +36,7 @@ export default {
         return Response.json({
           ok: true,
           mensaje:
-            'Conexión con D1 funcionando',
+            'Conexion con D1 funcionando',
           reservas:
           resultado.results
         });
@@ -48,7 +47,11 @@ export default {
           {
             ok: false,
             mensaje:
-              'Error al conectar con D1'
+              'Error al conectar con D1',
+            error:
+              error instanceof Error
+                ? error.message
+                : String(error)
           },
           {
             status: 500
@@ -57,8 +60,15 @@ export default {
       }
     }
 
-    return new Response(
-      'Ruta API no encontrada',
+    // Nos muestra qué ruta recibió realmente
+    return Response.json(
+      {
+        ok: false,
+        mensaje:
+          'Ruta API no encontrada',
+        rutaRecibida:
+        url.pathname
+      },
       {
         status: 404
       }
