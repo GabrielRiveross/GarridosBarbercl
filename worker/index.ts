@@ -2,56 +2,172 @@ export default {
 
   async fetch(
     request: Request,
-    env: {
-      DB: any;
-    }
+    env: Env
   ) {
 
     const url = new URL(request.url);
 
-    // Permite comprobar qué versión
-    // del Worker está desplegada
-    if (url.pathname === '/api/test') {
 
+    // =========================
+    // TEST API
+    // =========================
+
+    if (
+      url.pathname === '/api/test' &&
+      request.method === 'GET'
+    ) {
       return Response.json({
         ok: true,
-        version: 2,
         mensaje:
-          'Worker actualizado funcionando'
+          'API de Garridos Barber funcionando'
       });
     }
 
-    // Prueba de D1
-    if (url.pathname === '/api/test-db') {
+
+    // =========================
+    // TEST D1
+    // =========================
+
+    if (
+      url.pathname === '/api/test-db' &&
+      request.method === 'GET'
+    ) {
+
+      const resultado =
+        await env.DB
+          .prepare(
+            'SELECT * FROM reservas'
+          )
+          .all();
+
+      return Response.json({
+        ok: true,
+        reservas:
+        resultado.results
+      });
+    }
+
+
+    // =========================
+    // CREAR RESERVA
+    // =========================
+
+    if (
+      url.pathname === '/api/reservas' &&
+      request.method === 'POST'
+    ) {
 
       try {
 
+        const body =
+          await request.json<{
+            nombre: string;
+            apellido: string;
+            telefono: string;
+            fecha: string;
+            hora: string;
+          }>();
+
+        const {
+          nombre,
+          apellido,
+          telefono,
+          fecha,
+          hora
+        } = body;
+
+
+        if (
+          !nombre ||
+          !apellido ||
+          !telefono ||
+          !fecha ||
+          !hora
+        ) {
+
+          return Response.json(
+            {
+              ok: false,
+              mensaje:
+                'Faltan datos para realizar la reserva.'
+            },
+            {
+              status: 400
+            }
+          );
+        }
+
+
         const resultado =
           await env.DB
-            .prepare(
-              'SELECT * FROM reservas'
+            .prepare(`
+              INSERT INTO reservas
+              (
+                nombre,
+                apellido,
+                telefono,
+                fecha,
+                hora
+              )
+              VALUES (?, ?, ?, ?, ?)
+            `)
+            .bind(
+              nombre.trim(),
+              apellido.trim(),
+              telefono.trim(),
+              fecha,
+              hora
             )
-            .all();
+            .run();
 
-        return Response.json({
-          ok: true,
-          mensaje:
-            'Conexion con D1 funcionando',
-          reservas:
-          resultado.results
-        });
+
+        return Response.json(
+          {
+            ok: true,
+            mensaje:
+              'Reserva creada correctamente.',
+            id:
+            resultado.meta.last_row_id
+          },
+          {
+            status: 201
+          }
+        );
 
       } catch (error) {
+
+        const mensajeError =
+          error instanceof Error
+            ? error.message
+            : String(error);
+
+
+        if (
+          mensajeError.includes(
+            'UNIQUE constraint failed'
+          )
+        ) {
+
+          return Response.json(
+            {
+              ok: false,
+              mensaje:
+                'Este horario ya fue reservado.'
+            },
+            {
+              status: 409
+            }
+          );
+        }
+
+
+        console.error(error);
 
         return Response.json(
           {
             ok: false,
             mensaje:
-              'Error al conectar con D1',
-            error:
-              error instanceof Error
-                ? error.message
-                : String(error)
+              'No se pudo crear la reserva.'
           },
           {
             status: 500
@@ -60,14 +176,16 @@ export default {
       }
     }
 
-    // Nos muestra qué ruta recibió realmente
+
+    // =========================
+    // RUTA NO ENCONTRADA
+    // =========================
+
     return Response.json(
       {
         ok: false,
         mensaje:
-          'Ruta API no encontrada',
-        rutaRecibida:
-        url.pathname
+          'Ruta API no encontrada.'
       },
       {
         status: 404
