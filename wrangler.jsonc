@@ -16,6 +16,14 @@
     ]
   },
 
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "garridos-barber-db",
+      "database_id": "ac6de95c-4328-4124-aa35-8312f99cf233"
+    }
+  ],
+
   "observability": {
     "enabled": true
   }
