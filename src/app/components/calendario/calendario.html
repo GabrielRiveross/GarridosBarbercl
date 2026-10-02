@@ -1,1 +1,252 @@
-<p>calendario works!</p>
+<section class="reservas" id="reservas">
+
+  <div class="section-header">
+
+    <span>RESERVA TU HORA</span>
+
+    <h2>Agenda tu próxima visita</h2>
+
+    <p>
+      Puedes reservar tu hora hasta con 7 días
+      de anticipación.
+    </p>
+
+  </div>
+
+
+  <div class="reserva-container">
+
+    <!-- CALENDARIO -->
+
+    <div class="calendario">
+
+      <div class="calendario-header">
+
+        <button
+          type="button"
+          (click)="mesAnterior()"
+          aria-label="Mes anterior"
+        >
+          ‹
+        </button>
+
+
+        <h3>
+          {{ nombresMeses[mesMostrado] }}
+          {{ anioMostrado }}
+        </h3>
+
+
+        <button
+          type="button"
+          (click)="mesSiguiente()"
+          aria-label="Mes siguiente"
+        >
+          ›
+        </button>
+
+      </div>
+
+
+      <div class="dias-semana">
+
+        <span>Lun</span>
+        <span>Mar</span>
+        <span>Mié</span>
+        <span>Jue</span>
+        <span>Vie</span>
+        <span>Sáb</span>
+        <span>Dom</span>
+
+      </div>
+
+
+      <div class="dias-grid">
+
+        @for (dia of dias; track dia.fecha.getTime()) {
+
+          <button
+            type="button"
+
+            class="dia"
+
+            [class.otro-mes]="!dia.esMesActual"
+            [class.disponible]="dia.disponible"
+            [class.hoy]="dia.esHoy"
+            [class.seleccionado]="dia.seleccionado"
+
+            [disabled]="!dia.disponible"
+
+            (click)="seleccionarDia(dia)"
+          >
+
+            {{ dia.numero }}
+
+          </button>
+
+        }
+
+      </div>
+
+    </div>
+
+
+    <!-- HORARIOS -->
+
+    <div class="panel-horarios">
+
+      @if (!fechaSeleccionada) {
+
+        <div class="sin-seleccion">
+
+          <span>
+            Selecciona una fecha
+          </span>
+
+          <p>
+            Las horas disponibles aparecerán aquí.
+          </p>
+
+        </div>
+
+      }
+
+
+      @if (fechaSeleccionada) {
+
+        <div class="horarios-contenido">
+
+          <span class="label">
+            HORARIOS DISPONIBLES
+          </span>
+
+
+          <h3>
+            {{
+              fechaSeleccionada.toLocaleDateString(
+                'es-CL',
+                {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long'
+                }
+              )
+            }}
+          </h3>
+
+
+          @if (fechaSeleccionada.getDay() === 0) {
+
+            <p class="horario-atencion">
+              Horario domingo:
+              20:00 - 22:00
+            </p>
+
+          } @else {
+
+            <p class="horario-atencion">
+              Horario:
+              10:00 - 13:00 /
+              15:00 - 19:00
+            </p>
+
+          }
+
+          @if (horariosDisponibles.length === 0) {
+
+            <div class="sin-horarios">
+
+              <p>
+                No quedan horarios disponibles
+                para este día.
+              </p>
+
+              <span>
+                Selecciona otra fecha para continuar.
+              </span>
+
+            </div>
+
+          }
+
+
+          <div class="horarios-grid">
+
+            @for (
+              hora of horariosDisponibles;
+              track hora
+              ) {
+
+              <button
+                type="button"
+
+                class="hora"
+
+                [class.seleccionada]="
+                  horaSeleccionada === hora
+                "
+
+                (click)="seleccionarHora(hora)"
+              >
+
+                {{ hora }}
+
+              </button>
+
+            }
+
+            @if (
+              mostrarFormulario &&
+              fechaSeleccionada &&
+              horaSeleccionada
+              ) {
+
+              <app-reserva-form
+                [fecha]="fechaSeleccionada"
+                [hora]="horaSeleccionada"
+
+                (cancelar)="volverAHorarios()"
+                (reservaCreada)="recibirReserva($event)"
+              />
+
+            }
+
+          </div>
+
+
+          @if (horaSeleccionada) {
+
+            <div class="continuar">
+
+              <div class="resumen-seleccion">
+
+                <span>Hora seleccionada</span>
+
+                <strong>
+                  {{ horaSeleccionada }}
+                </strong>
+
+              </div>
+
+
+              <button
+                type="button"
+                class="btn-continuar"
+                (click)="continuarReserva()"
+              >
+                Continuar
+              </button>
+
+            </div>
+
+          }
+
+        </div>
+
+      }
+
+    </div>
+
+  </div>
+
+</section>

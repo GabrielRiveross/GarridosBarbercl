@@ -1,1 +1,170 @@
-<p>reserva-form works!</p>
+<div class="formulario-reserva">
+
+  <div class="form-header">
+
+    <span class="label">
+      DATOS DE LA RESERVA
+    </span>
+
+    <h3>Completa tus datos</h3>
+
+    <p>
+      Ingresa tus datos para confirmar la hora.
+    </p>
+
+  </div>
+
+
+  <div class="resumen">
+
+    <div class="resumen-item">
+
+      <span>Fecha</span>
+
+      <strong>
+        {{
+          fecha.toLocaleDateString(
+            'es-CL',
+            {
+              weekday: 'long',
+              day: 'numeric',
+              month: 'long'
+            }
+          )
+        }}
+      </strong>
+
+    </div>
+
+
+    <div class="resumen-item">
+
+      <span>Hora</span>
+
+      <strong>
+        {{ hora }}
+      </strong>
+
+    </div>
+
+  </div>
+
+
+  <form
+    [formGroup]="formulario"
+    (ngSubmit)="confirmarReserva()"
+  >
+
+    <!-- NOMBRE -->
+
+    <div class="campo">
+
+      <label for="nombre">
+        Nombre
+      </label>
+
+      <input
+        id="nombre"
+        type="text"
+        formControlName="nombre"
+        placeholder="Tu nombre"
+        autocomplete="given-name"
+      >
+
+      @if (
+        formulario.get('nombre')?.invalid &&
+        formulario.get('nombre')?.touched
+        ) {
+
+        <span class="error">
+          Ingresa un nombre válido.
+        </span>
+
+      }
+
+    </div>
+
+
+    <!-- APELLIDO -->
+
+    <div class="campo">
+
+      <label for="apellido">
+        Apellido
+      </label>
+
+      <input
+        id="apellido"
+        type="text"
+        formControlName="apellido"
+        placeholder="Tu apellido"
+        autocomplete="family-name"
+      >
+
+      @if (
+        formulario.get('apellido')?.invalid &&
+        formulario.get('apellido')?.touched
+        ) {
+
+        <span class="error">
+          Ingresa un apellido válido.
+        </span>
+
+      }
+
+    </div>
+
+
+    <!-- TELÉFONO -->
+
+    <div class="campo">
+
+      <label for="telefono">
+        Teléfono
+      </label>
+
+      <input
+        id="telefono"
+        type="tel"
+        formControlName="telefono"
+        placeholder="+56 9 1234 5678"
+        autocomplete="tel"
+      >
+
+      @if (
+        formulario.get('telefono')?.invalid &&
+        formulario.get('telefono')?.touched
+        ) {
+
+        <span class="error">
+          Ingresa un número de teléfono válido.
+        </span>
+
+      }
+
+    </div>
+
+
+    <div class="acciones">
+
+      <button
+        type="button"
+        class="btn-volver"
+        (click)="volver()"
+      >
+        Volver
+      </button>
+
+
+      <button
+        type="submit"
+        class="btn-confirmar"
+      >
+        Confirmar reserva
+      </button>
+
+    </div>
+
+  </form>
+
+</div>

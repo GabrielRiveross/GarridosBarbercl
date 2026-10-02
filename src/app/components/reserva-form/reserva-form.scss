@@ -1,0 +1,194 @@
+.formulario-reserva {
+  width: 100%;
+}
+
+
+.form-header {
+
+  .label {
+    color: var(--color-dorado);
+
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    letter-spacing: 2px;
+  }
+
+  h3 {
+    margin: 10px 0 5px;
+
+    font-size: 1.4rem;
+  }
+
+  p {
+    color: var(--color-gris);
+
+    line-height: 1.5;
+  }
+}
+
+
+/* RESUMEN */
+
+.resumen {
+  margin: 25px 0;
+
+  padding: 18px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 15px;
+
+  background: #151515;
+
+  border-left: 3px solid
+  var(--color-dorado);
+
+  border-radius: 4px;
+}
+
+
+.resumen-item {
+  display: flex;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+  span {
+    color: var(--color-gris);
+  }
+
+  strong {
+    color: var(--color-blanco);
+
+    text-align: right;
+
+    text-transform: capitalize;
+  }
+}
+
+
+/* CAMPOS */
+
+.campo {
+  margin-bottom: 20px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+
+  label {
+    color: var(--color-blanco);
+
+    font-size: 0.9rem;
+
+    font-weight: 500;
+  }
+
+  input {
+    width: 100%;
+
+    padding: 13px 14px;
+
+    background: #151515;
+
+    color: var(--color-blanco);
+
+    border: 1px solid #333;
+
+    border-radius: 4px;
+
+    outline: none;
+
+    font-size: 0.95rem;
+
+    transition: 0.2s;
+
+    &:focus {
+      border-color:
+        var(--color-dorado);
+    }
+
+    &::placeholder {
+      color: #666;
+    }
+  }
+}
+
+
+.error {
+  color: #e57373;
+
+  font-size: 0.8rem;
+}
+
+
+/* BOTONES */
+
+.acciones {
+  margin-top: 30px;
+
+  display: grid;
+
+  grid-template-columns: 1fr 2fr;
+
+  gap: 10px;
+}
+
+
+.btn-volver,
+.btn-confirmar {
+  padding: 14px;
+
+  border-radius: 4px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+
+.btn-volver {
+  background: transparent;
+
+  color: var(--color-blanco);
+
+  border: 1px solid #444;
+
+  &:hover {
+    border-color: var(--color-dorado);
+
+    color: var(--color-dorado);
+  }
+}
+
+
+.btn-confirmar {
+  background: var(--color-dorado);
+
+  color: var(--color-negro);
+
+  border: 1px solid
+  var(--color-dorado);
+
+  &:hover {
+    background:
+      var(--color-dorado-hover);
+  }
+}
+
+
+@media (max-width: 500px) {
+
+  .acciones {
+    grid-template-columns: 1fr;
+  }
+
+}
