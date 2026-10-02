@@ -15,6 +15,10 @@ import {
   ReservaForm
 } from '../reserva-form/reserva-form';
 
+import {
+  ReservasService
+} from '../../services/reservas.service';
+
 
 @Component({
   selector: 'app-calendario',
@@ -493,6 +497,9 @@ export class Calendario implements OnInit {
 
     }
 
+    this.mensajeReserva = '';
+    this.errorReserva = '';
+
 
     /*
      * Comprobamos si la fecha seleccionada
@@ -648,21 +655,65 @@ export class Calendario implements OnInit {
     reserva: Reserva
   ): void {
 
+    if (this.guardandoReserva) {
+      return;
+    }
 
-    /*
-     * Por ahora solamente comprobamos
-     * que Angular está construyendo
-     * correctamente la reserva.
-     *
-     * Más adelante aquí llamaremos
-     * al servicio HTTP.
-     */
+    this.guardandoReserva = true;
 
-    console.log(
-      'Reserva preparada:',
-      reserva
-    );
+    this.mensajeReserva = '';
 
+    this.errorReserva = '';
+
+    this.reservasService
+      .crearReserva(reserva)
+      .subscribe({
+
+        next: response => {
+
+          this.guardandoReserva =
+            false;
+
+          this.mensajeReserva =
+            response.mensaje;
+
+          this.mostrarFormulario =
+            false;
+
+          this.horaSeleccionada =
+            null;
+
+          this.cargarHorarios();
+        },
+
+        error: error => {
+
+          this.guardandoReserva =
+            false;
+
+          if (
+            error.status === 409
+          ) {
+
+            this.errorReserva =
+              'Este horario acaba de ser reservado. Selecciona otra hora.';
+
+            this.mostrarFormulario =
+              false;
+
+            this.horaSeleccionada =
+              null;
+
+            this.cargarHorarios();
+
+            return;
+          }
+
+          this.errorReserva =
+            'No se pudo realizar la reserva. Inténtalo nuevamente.';
+        }
+
+      });
   }
 
 
@@ -743,5 +794,15 @@ export class Calendario implements OnInit {
     );
 
   }
+  guardandoReserva = false;
+
+  mensajeReserva = '';
+
+  errorReserva = '';
+
+  constructor(
+    private reservasService:
+    ReservasService
+  ) {}
 
 }

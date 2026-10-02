@@ -90,6 +90,17 @@
 
     </div>
 
+    @if (mensajeReserva) {
+      <div class="mensaje-reserva exito">
+        {{ mensajeReserva }}
+      </div>
+    }
+
+    @if (errorReserva) {
+      <div class="mensaje-reserva error">
+        {{ errorReserva }}
+      </div>
+    }
 
     <!-- HORARIOS -->
 

@@ -4,7 +4,6 @@
   background: var(--color-negro-secundario);
 }
 
-
 .section-header {
   max-width: 700px;
 
@@ -34,7 +33,6 @@
   }
 }
 
-
 .reserva-container {
   max-width: 1100px;
 
@@ -54,16 +52,13 @@
   overflow: hidden;
 }
 
-
 /* CALENDARIO */
-
 .calendario {
   padding: 35px;
 
   border-right: 1px solid
   rgba(212, 175, 55, 0.15);
 }
-
 
 .calendario-header {
   margin-bottom: 30px;
@@ -106,7 +101,6 @@
   }
 }
 
-
 .dias-semana {
   margin-bottom: 10px;
 
@@ -128,7 +122,6 @@
   }
 }
 
-
 .dias-grid {
   display: grid;
 
@@ -137,7 +130,6 @@
 
   gap: 6px;
 }
-
 
 .dia {
   aspect-ratio: 1;
@@ -156,7 +148,6 @@
 
   transition: 0.2s;
 
-
   &.disponible {
     color: var(--color-blanco);
 
@@ -172,12 +163,10 @@
     }
   }
 
-
   &.hoy {
     border: 1px solid
     var(--color-dorado);
   }
-
 
   &.seleccionado {
     background:
@@ -189,20 +178,16 @@
     font-weight: bold;
   }
 
-
   &.otro-mes {
     opacity: 0.25;
   }
-
 
   &:disabled {
     cursor: default;
   }
 }
 
-
 /* HORARIOS */
-
 .panel-horarios {
   padding: 35px;
 
@@ -214,7 +199,6 @@
 
   justify-content: center;
 }
-
 
 .sin-seleccion {
   text-align: center;
@@ -234,7 +218,6 @@
   }
 }
 
-
 .label {
   color: var(--color-dorado);
 
@@ -244,7 +227,6 @@
 
   letter-spacing: 2px;
 }
-
 
 .horarios-contenido {
 
@@ -256,7 +238,6 @@
     text-transform: capitalize;
   }
 }
-
 
 .horario-atencion {
   margin-bottom: 25px;
@@ -319,7 +300,6 @@
 
   transition: 0.2s;
 
-
   &:hover {
     border-color:
       var(--color-dorado);
@@ -327,7 +307,6 @@
     color:
       var(--color-dorado);
   }
-
 
   &.seleccionada {
     background:
@@ -343,6 +322,26 @@
   }
 }
 
+/* Mensaje de aviso */
+
+.mensaje-reserva {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.mensaje-reserva.exito {
+  background: rgba(46, 125, 50, 0.15);
+  border: 1px solid #2e7d32;
+  color: #81c784;
+}
+
+.mensaje-reserva.error {
+  background: rgba(198, 40, 40, 0.15);
+  border: 1px solid #c62828;
+  color: #ef9a9a;
+}
 
 /* CONTINUAR */
 
@@ -353,7 +352,6 @@
 
   border-top: 1px solid #222;
 }
-
 
 .resumen-seleccion {
   margin-bottom: 15px;
@@ -370,7 +368,6 @@
     color: var(--color-dorado);
   }
 }
-
 
 .btn-continuar {
   width: 100%;
@@ -393,13 +390,11 @@
 
   transition: 0.2s;
 
-
   &:hover {
     background:
       var(--color-dorado-hover);
   }
 }
-
 
 /* RESPONSIVE */
 
@@ -421,7 +416,6 @@
   }
 
 }
-
 
 @media (max-width: 550px) {
 
