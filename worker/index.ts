@@ -80,6 +80,27 @@ interface FechaHoraChile
 
 }
 
+interface ReservaAdmin {
+
+  id: number;
+
+  nombre: string;
+
+  apellido: string;
+
+  telefono: string;
+
+  fecha: string;
+
+  hora: string;
+
+  estado: string;
+
+  created_at: string;
+
+}
+
+
 
 /*
  * ========================================
@@ -799,6 +820,89 @@ export default {
         horasOcupadas
 
       });
+
+    }
+
+    /*
+ * ========================================
+ * ADMIN - LISTAR RESERVAS
+ *
+ * GET /api/admin/reservas
+ * ========================================
+ */
+
+    if (
+      url.pathname ===
+      '/api/admin/reservas' &&
+
+      request.method === 'GET'
+    ) {
+
+
+      try {
+
+
+        const resultado =
+
+          await env.DB
+
+            .prepare(
+              `
+          SELECT
+            id,
+            nombre,
+            apellido,
+            telefono,
+            fecha,
+            hora,
+            estado,
+            created_at
+
+          FROM reservas
+
+          ORDER BY
+            fecha ASC,
+            hora ASC
+          `
+            )
+
+            .all<ReservaAdmin>();
+
+
+        return Response.json({
+
+          ok: true,
+
+          reservas:
+          resultado.results
+
+        });
+
+
+      } catch (error) {
+
+
+        console.error(
+          'Error al obtener reservas:',
+          error
+        );
+
+
+        return Response.json(
+          {
+
+            ok: false,
+
+            mensaje:
+              'No se pudieron obtener las reservas.'
+
+          },
+          {
+            status: 500
+          }
+        );
+
+      }
 
     }
 
