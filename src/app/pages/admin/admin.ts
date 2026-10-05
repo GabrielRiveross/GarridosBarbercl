@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   OnInit
 } from '@angular/core';
@@ -13,24 +14,37 @@ import {
 
 
 interface ReservaAdmin {
+
   id: number;
+
   nombre: string;
+
   apellido: string;
+
   telefono: string;
+
   fecha: string;
+
   hora: string;
+
   estado: string;
+
   created_at: string;
+
 }
 
 
 interface ReservasAdminResponse {
+
   ok: boolean;
+
   reservas: ReservaAdmin[];
+
 }
 
 
 @Component({
+
   selector: 'app-admin',
 
   imports: [
@@ -40,8 +54,10 @@ interface ReservasAdminResponse {
   templateUrl: './admin.html',
 
   styleUrl: './admin.scss'
+
 })
-export class Admin implements OnInit {
+export class Admin
+  implements OnInit {
 
 
   reservas:
@@ -54,8 +70,13 @@ export class Admin implements OnInit {
 
 
   constructor(
+
     private http:
-    HttpClient
+    HttpClient,
+
+    private cdr:
+    ChangeDetectorRef
+
   ) {}
 
 
@@ -75,34 +96,70 @@ export class Admin implements OnInit {
 
 
     this.http
+
       .get<ReservasAdminResponse>(
         '/api/admin/reservas'
       )
+
       .subscribe({
 
+
+        /*
+         * =========================
+         * RESPUESTA CORRECTA
+         * =========================
+         */
 
         next: response => {
 
 
           this.reservas =
-            response.reservas;
+            response.reservas ?? [];
 
 
           this.cargando =
             false;
+
+
+          /*
+           * Forzamos actualización
+           * inmediata de la interfaz.
+           */
+
+          this.cdr
+            .detectChanges();
 
         },
 
 
-        error: () => {
+        /*
+         * =========================
+         * ERROR
+         * =========================
+         */
+
+        error: error => {
+
+
+          console.error(
+            'Error al cargar reservas:',
+            error
+          );
 
 
           this.cargando =
             false;
 
 
+          this.reservas = [];
+
+
           this.error =
             'No fue posible cargar las reservas.';
+
+
+          this.cdr
+            .detectChanges();
 
         }
 
@@ -110,6 +167,12 @@ export class Admin implements OnInit {
 
   }
 
+
+  /*
+   * =========================
+   * FORMATEAR FECHA
+   * =========================
+   */
 
   formatearFecha(
     fecha: string
@@ -128,21 +191,37 @@ export class Admin implements OnInit {
 
     const fechaLocal =
       new Date(
+
         anio,
+
         mes - 1,
+
         dia
+
       );
 
 
     return fechaLocal
       .toLocaleDateString(
+
         'es-CL',
+
         {
-          weekday: 'short',
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
+
+          weekday:
+            'short',
+
+          day:
+            '2-digit',
+
+          month:
+            '2-digit',
+
+          year:
+            'numeric'
+
         }
+
       );
 
   }
