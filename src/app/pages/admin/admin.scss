@@ -361,3 +361,94 @@ max-width: 700px
   }
 
 }
+
+.mensaje-exito {
+  margin-bottom:
+    25px;
+
+  padding:
+    15px;
+
+  border:
+    1px solid
+    #2e7d32;
+
+  background:
+    rgba(
+        46,
+        125,
+        50,
+        0.15
+    );
+
+  color:
+    #81c784;
+}
+
+
+.btn-cancelar {
+  padding:
+    8px
+    14px;
+
+  border:
+    1px solid
+    #c62828;
+
+  background:
+    transparent;
+
+  color:
+    #ef9a9a;
+
+  cursor:
+    pointer;
+
+  transition:
+    0.2s;
+
+
+  &:hover:not(:disabled) {
+    background:
+      #c62828;
+
+    color:
+      #fff;
+  }
+
+
+  &:disabled {
+    opacity:
+      0.5;
+
+    cursor:
+      default;
+  }
+}
+
+
+.sin-accion {
+  color:
+    var(--color-gris);
+
+  font-size:
+    0.85rem;
+}
+
+
+.estado-reserva.cancelada {
+  background:
+    rgba(
+        198,
+        40,
+        40,
+        0.15
+    );
+
+  color:
+    #ef9a9a;
+
+  border:
+    1px solid
+    #c62828;
+}

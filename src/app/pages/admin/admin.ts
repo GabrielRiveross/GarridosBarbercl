@@ -66,6 +66,11 @@ export class Admin
 
   cargando = false;
 
+  cancelandoId:
+    number | null = null;
+
+  mensaje = '';
+
   error = '';
 
 
@@ -151,6 +156,8 @@ export class Admin
             false;
 
 
+
+
           this.reservas = [];
 
 
@@ -223,6 +230,105 @@ export class Admin
         }
 
       );
+
+  }
+
+  cancelarReserva(
+    reserva: ReservaAdmin
+  ): void {
+
+
+    if (
+      reserva.estado ===
+      'cancelada'
+    ) {
+
+      return;
+
+    }
+
+
+    const confirmar =
+      window.confirm(
+        `¿Deseas cancelar la reserva de ${reserva.nombre} ${reserva.apellido} para el ${this.formatearFecha(reserva.fecha)} a las ${reserva.hora}?`
+      );
+
+
+    if (!confirmar) {
+
+      return;
+
+    }
+
+
+    this.cancelandoId =
+      reserva.id;
+
+    this.mensaje = '';
+
+    this.error = '';
+
+
+    this.http
+      .delete<{
+        ok: boolean;
+        mensaje: string;
+      }>(
+        `/api/admin/reservas/${reserva.id}`
+      )
+      .subscribe({
+
+
+        next: response => {
+
+
+          this.cancelandoId =
+            null;
+
+
+          this.mensaje =
+            response.mensaje;
+
+
+          /*
+           * Actualizamos localmente
+           * la reserva para no depender
+           * de una segunda petición.
+           */
+
+          reserva.estado =
+            'cancelada';
+
+
+          /*
+           * Patrón que ya sabemos que
+           * necesitamos con Cloudflare.
+           */
+
+          this.cdr
+            .detectChanges();
+
+        },
+
+
+        error: error => {
+
+
+          this.cancelandoId =
+            null;
+
+
+          this.error =
+            error.error?.mensaje ??
+            'No fue posible cancelar la reserva.';
+
+
+          this.cdr
+            .detectChanges();
+
+        }
+
+      });
 
   }
 

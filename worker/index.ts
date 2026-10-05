@@ -906,6 +906,153 @@ export default {
 
     }
 
+    /*
+ * ========================================
+ * ADMIN - CANCELAR RESERVA
+ *
+ * DELETE /api/admin/reservas/:id
+ * ========================================
+ */
+
+    if (
+      url.pathname.startsWith(
+        '/api/admin/reservas/'
+      ) &&
+      request.method === 'DELETE'
+    ) {
+
+      try {
+
+        const partes =
+          url.pathname.split('/');
+
+        const idTexto =
+          partes[
+          partes.length - 1
+            ];
+
+        const id =
+          Number(idTexto);
+
+
+        if (
+          !Number.isInteger(id) ||
+          id <= 0
+        ) {
+
+          return Response.json(
+            {
+              ok: false,
+              mensaje:
+                'El identificador de la reserva no es válido.'
+            },
+            {
+              status: 400
+            }
+          );
+
+        }
+
+
+        const reserva =
+          await env.DB
+            .prepare(
+              `
+          SELECT
+            id,
+            estado
+
+          FROM reservas
+
+          WHERE id = ?
+          `
+            )
+            .bind(id)
+            .first<{
+              id: number;
+              estado: string;
+            }>();
+
+
+        if (!reserva) {
+
+          return Response.json(
+            {
+              ok: false,
+              mensaje:
+                'La reserva no existe.'
+            },
+            {
+              status: 404
+            }
+          );
+
+        }
+
+
+        if (
+          reserva.estado ===
+          'cancelada'
+        ) {
+
+          return Response.json(
+            {
+              ok: false,
+              mensaje:
+                'La reserva ya está cancelada.'
+            },
+            {
+              status: 409
+            }
+          );
+
+        }
+
+
+        await env.DB
+          .prepare(
+            `
+        UPDATE reservas
+
+        SET estado = 'cancelada'
+
+        WHERE id = ?
+        `
+          )
+          .bind(id)
+          .run();
+
+
+        return Response.json({
+          ok: true,
+          mensaje:
+            'Reserva cancelada correctamente.'
+        });
+
+
+      } catch (error) {
+
+        console.error(
+          'Error al cancelar reserva:',
+          error
+        );
+
+
+        return Response.json(
+          {
+            ok: false,
+            mensaje:
+              'No se pudo cancelar la reserva.'
+          },
+          {
+            status: 500
+          }
+        );
+
+      }
+
+    }
+
 
     /*
      * ========================================
