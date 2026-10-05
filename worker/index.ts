@@ -47,6 +47,57 @@ export default {
       });
     }
 
+    // =========================
+// DISPONIBILIDAD
+// =========================
+
+    if (
+      url.pathname === '/api/disponibilidad' &&
+      request.method === 'GET'
+    ) {
+
+      const fecha =
+        url.searchParams.get('fecha');
+
+      if (!fecha) {
+        return Response.json(
+          {
+            ok: false,
+            mensaje:
+              'Debe indicar una fecha.'
+          },
+          {
+            status: 400
+          }
+        );
+      }
+
+
+      const resultado =
+        await env.DB
+          .prepare(`
+        SELECT hora
+        FROM reservas
+        WHERE fecha = ?
+        AND estado = 'confirmada'
+        ORDER BY hora
+      `)
+          .bind(fecha)
+          .all<{ hora: string }>();
+
+
+      const horasOcupadas =
+        resultado.results.map(
+          reserva => reserva.hora
+        );
+
+
+      return Response.json({
+        ok: true,
+        fecha,
+        horasOcupadas
+      });
+    }
 
     // =========================
     // CREAR RESERVA

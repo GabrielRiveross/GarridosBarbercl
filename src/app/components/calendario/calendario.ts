@@ -72,16 +72,21 @@ export class Calendario implements OnInit {
 
 
   /*
-   * Controla si mostramos:
-   *
-   * horarios
-   *
-   * o
-   *
-   * formulario
+   * MOSTRAR FORMULARIO
    */
 
   mostrarFormulario = false;
+
+
+  /*
+   * ESTADO DE LA RESERVA
+   */
+
+  guardandoReserva = false;
+
+  mensajeReserva = '';
+
+  errorReserva = '';
 
 
   /*
@@ -128,8 +133,7 @@ export class Calendario implements OnInit {
 
 
   /*
-   * Esta lista cambia automáticamente
-   * dependiendo del día seleccionado.
+   * HORARIOS DISPONIBLES
    */
 
   horariosDisponibles:
@@ -159,8 +163,17 @@ export class Calendario implements OnInit {
 
 
   /*
-   * Al cargar el componente
-   * generamos el calendario.
+   * SERVICIO DE RESERVAS
+   */
+
+  constructor(
+    private reservasService:
+    ReservasService
+  ) {}
+
+
+  /*
+   * AL INICIAR
    */
 
   ngOnInit(): void {
@@ -218,8 +231,7 @@ export class Calendario implements OnInit {
 
 
     /*
-     * Agregamos días del mes anterior
-     * para completar la primera semana.
+     * DÍAS DEL MES ANTERIOR
      */
 
     for (
@@ -271,10 +283,8 @@ export class Calendario implements OnInit {
 
 
     /*
-     * Completamos el calendario
-     * hasta llegar a 42 casillas.
-     *
-     * 7 días × 6 semanas.
+     * COMPLETAR HASTA
+     * 42 CASILLAS
      */
 
     while (
@@ -309,7 +319,7 @@ export class Calendario implements OnInit {
 
 
   /*
-   * AGREGA UN DÍA AL CALENDARIO
+   * AGREGAR DÍA
    */
 
   private agregarDia(
@@ -331,9 +341,7 @@ export class Calendario implements OnInit {
 
 
     /*
-     * Fecha máxima para reservar.
-     *
-     * Hoy + 7 días.
+     * HOY + 7 DÍAS
      */
 
     const fechaLimite =
@@ -348,11 +356,7 @@ export class Calendario implements OnInit {
 
 
     /*
-     * Para reservar:
-     *
-     * - Debe pertenecer al mes mostrado.
-     * - No puede ser anterior a hoy.
-     * - No puede superar hoy + 7 días.
+     * DISPONIBILIDAD DEL DÍA
      */
 
     const disponible =
@@ -363,11 +367,6 @@ export class Calendario implements OnInit {
 
       fechaComparar <= fechaLimite;
 
-
-    /*
-     * Creamos el objeto
-     * DiaCalendario.
-     */
 
     this.dias.push({
 
@@ -419,9 +418,14 @@ export class Calendario implements OnInit {
 
 
     /*
-     * Guardamos una copia
-     * de la fecha.
+     * Al seleccionar otro día
+     * limpiamos mensajes anteriores.
      */
+
+    this.mensajeReserva = '';
+
+    this.errorReserva = '';
+
 
     this.fechaSeleccionada =
       new Date(
@@ -429,36 +433,21 @@ export class Calendario implements OnInit {
       );
 
 
-    /*
-     * Si seleccionamos otra fecha,
-     * eliminamos la hora anterior.
-     */
-
     this.horaSeleccionada =
       null;
 
-
-    /*
-     * También regresamos al panel
-     * de horarios.
-     */
 
     this.mostrarFormulario =
       false;
 
 
     /*
-     * Cargamos horarios según
-     * el día seleccionado.
+     * Consulta horarios locales
+     * + disponibilidad de D1.
      */
 
     this.cargarHorarios();
 
-
-    /*
-     * Regeneramos para mostrar
-     * visualmente el día seleccionado.
-     */
 
     this.generarCalendario();
 
@@ -466,22 +455,36 @@ export class Calendario implements OnInit {
 
 
   /*
-   * HORARIOS SEGÚN DÍA
+   * CARGAR HORARIOS
+   *
+   * 1. Determina horarios del día.
+   * 2. Elimina horas pasadas si es hoy.
+   * 3. Consulta D1.
+   * 4. Elimina horas ya reservadas.
    */
 
   private cargarHorarios(): void {
 
     if (!this.fechaSeleccionada) {
+
       this.horariosDisponibles = [];
+
       return;
+
     }
+
 
     const diaSemana =
       this.fechaSeleccionada.getDay();
 
+
     let horariosBase: string[];
 
-    // Domingo
+
+    /*
+     * Domingo
+     */
+
     if (diaSemana === 0) {
 
       horariosBase = [
@@ -490,26 +493,26 @@ export class Calendario implements OnInit {
 
     } else {
 
-      // Lunes a sábado
+      /*
+       * Lunes a sábado
+       */
+
       horariosBase = [
         ...this.horariosSemana
       ];
 
     }
 
-    this.mensajeReserva = '';
-    this.errorReserva = '';
-
 
     /*
-     * Comprobamos si la fecha seleccionada
-     * corresponde a hoy.
+     * COMPROBAR SI ES HOY
      */
 
     const hoy =
       this.normalizarFecha(
         new Date()
       );
+
 
     const fechaSeleccionadaNormalizada =
       this.normalizarFecha(
@@ -523,75 +526,127 @@ export class Calendario implements OnInit {
 
 
     /*
-     * Si NO es hoy, mostramos todos
-     * los horarios correspondientes.
+     * SI ES HOY:
+     *
+     * Eliminamos horas pasadas
+     * y exigimos 30 minutos
+     * de anticipación.
      */
 
-    if (!esHoy) {
+    if (esHoy) {
 
-      this.horariosDisponibles =
-        horariosBase;
+      const ahora =
+        new Date();
 
-      return;
+
+      const anticipacionMinutos =
+        30;
+
+
+      horariosBase =
+        horariosBase.filter(
+          hora => {
+
+            const [
+              horas,
+              minutos
+            ] = hora
+              .split(':')
+              .map(Number);
+
+
+            const fechaHoraReserva =
+              new Date(
+                this.fechaSeleccionada!
+              );
+
+
+            fechaHoraReserva.setHours(
+              horas,
+              minutos,
+              0,
+              0
+            );
+
+
+            const limiteReserva =
+              new Date(
+                ahora.getTime() +
+                anticipacionMinutos *
+                60 *
+                1000
+              );
+
+
+            return (
+              fechaHoraReserva >
+              limiteReserva
+            );
+
+          }
+        );
 
     }
 
 
     /*
-     * Si ES HOY, eliminamos horarios
-     * que ya pasaron.
+     * FORMATEAR FECHA PARA LA API
      *
-     * Además exigimos reservar con
-     * mínimo 30 minutos de anticipación.
+     * Ejemplo:
+     * 2026-10-05
      */
 
-    const ahora = new Date();
-
-    const anticipacionMinutos = 30;
-
-
-    this.horariosDisponibles =
-      horariosBase.filter(
-        hora => {
-
-          const [
-            horas,
-            minutos
-          ] = hora
-            .split(':')
-            .map(Number);
+    const fecha =
+      this.formatearFecha(
+        this.fechaSeleccionada
+      );
 
 
-          const fechaHoraReserva =
-            new Date(
-              this.fechaSeleccionada!
+    /*
+     * CONSULTAR D1
+     */
+
+    this.reservasService
+      .obtenerDisponibilidad(fecha)
+      .subscribe({
+
+        next: response => {
+
+
+          /*
+           * Eliminamos de los horarios
+           * las horas ocupadas.
+           */
+
+          this.horariosDisponibles =
+            horariosBase.filter(
+              hora =>
+                !response
+                  .horasOcupadas
+                  .includes(hora)
             );
 
-
-          fechaHoraReserva.setHours(
-            horas,
-            minutos,
-            0,
-            0
-          );
+        },
 
 
-          const limiteReserva =
-            new Date(
-              ahora.getTime() +
-              anticipacionMinutos *
-              60 *
-              1000
-            );
+        error: () => {
 
 
-          return (
-            fechaHoraReserva >
-            limiteReserva
-          );
+          /*
+           * Si no podemos consultar D1,
+           * no mostramos horarios para
+           * evitar reservas incorrectas.
+           */
+
+          this.horariosDisponibles = [];
+
+
+          this.errorReserva =
+            'No fue posible cargar los horarios disponibles.';
 
         }
-      );
+
+      });
 
   }
 
@@ -634,8 +689,7 @@ export class Calendario implements OnInit {
 
 
   /*
-   * VOLVER DESDE EL FORMULARIO
-   * A LOS HORARIOS
+   * VOLVER DESDE FORMULARIO
    */
 
   volverAHorarios(): void {
@@ -647,73 +701,133 @@ export class Calendario implements OnInit {
 
 
   /*
-   * RECIBIR RESERVA DESDE
-   * reserva-form
+   * RECIBIR RESERVA
+   * DESDE reserva-form
    */
 
   recibirReserva(
     reserva: Reserva
   ): void {
 
+
+    /*
+     * Evita doble clic
+     * o doble envío.
+     */
+
     if (this.guardandoReserva) {
+
       return;
+
     }
 
-    this.guardandoReserva = true;
+
+    this.guardandoReserva =
+      true;
+
 
     this.mensajeReserva = '';
 
     this.errorReserva = '';
 
+
     this.reservasService
       .crearReserva(reserva)
       .subscribe({
 
+
+        /*
+         * RESERVA CREADA
+         */
+
         next: response => {
+
 
           this.guardandoReserva =
             false;
+
+
+          /*
+           * IMPORTANTE:
+           *
+           * Este mensaje NO se limpia
+           * en cargarHorarios().
+           */
 
           this.mensajeReserva =
             response.mensaje;
 
+
           this.mostrarFormulario =
             false;
+
 
           this.horaSeleccionada =
             null;
 
+
+          /*
+           * Volvemos a consultar D1.
+           *
+           * La hora recién reservada
+           * debería desaparecer.
+           */
+
           this.cargarHorarios();
+
         },
+
+
+        /*
+         * ERROR
+         */
 
         error: error => {
 
+
           this.guardandoReserva =
             false;
+
+
+          /*
+           * 409:
+           *
+           * Otra persona reservó
+           * esa hora primero.
+           */
 
           if (
             error.status === 409
           ) {
 
+
             this.errorReserva =
               'Este horario acaba de ser reservado. Selecciona otra hora.';
+
 
             this.mostrarFormulario =
               false;
 
+
             this.horaSeleccionada =
               null;
 
+
             this.cargarHorarios();
 
+
             return;
+
           }
+
 
           this.errorReserva =
             'No se pudo realizar la reserva. Inténtalo nuevamente.';
+
         }
 
       });
+
   }
 
 
@@ -770,12 +884,52 @@ export class Calendario implements OnInit {
 
 
   /*
+   * FORMATEAR FECHA
+   *
+   * Date
+   * ↓
+   * YYYY-MM-DD
+   */
+
+  private formatearFecha(
+    fecha: Date
+  ): string {
+
+
+    const anio =
+      fecha.getFullYear();
+
+
+    const mes =
+      String(
+        fecha.getMonth() + 1
+      ).padStart(
+        2,
+        '0'
+      );
+
+
+    const dia =
+      String(
+        fecha.getDate()
+      ).padStart(
+        2,
+        '0'
+      );
+
+
+    return (
+      `${anio}-${mes}-${dia}`
+    );
+
+  }
+
+
+  /*
    * NORMALIZAR FECHA
    *
-   * Elimina hora, minutos y segundos.
-   *
-   * Así podemos comparar únicamente
-   * las fechas.
+   * Elimina hora,
+   * minutos y segundos.
    */
 
   private normalizarFecha(
@@ -794,15 +948,5 @@ export class Calendario implements OnInit {
     );
 
   }
-  guardandoReserva = false;
-
-  mensajeReserva = '';
-
-  errorReserva = '';
-
-  constructor(
-    private reservasService:
-    ReservasService
-  ) {}
 
 }

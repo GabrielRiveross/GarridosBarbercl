@@ -10,6 +10,12 @@ export interface ReservaResponse {
   id?: number;
 }
 
+export interface DisponibilidadResponse {
+  ok: boolean;
+  fecha: string;
+  horasOcupadas: string[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -29,6 +35,15 @@ export class ReservasService {
     return this.http.post<ReservaResponse>(
       this.apiUrl,
       reserva
+    );
+  }
+
+  obtenerDisponibilidad(
+    fecha: string
+  ): Observable<DisponibilidadResponse> {
+
+    return this.http.get<DisponibilidadResponse>(
+      `/api/disponibilidad?fecha=${fecha}`
     );
   }
 }
