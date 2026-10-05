@@ -1,1 +1,213 @@
-<p>admin works!</p>
+<section class="admin">
+
+  <div class="admin-header">
+
+    <div>
+
+      <span class="subtitulo">
+        ADMINISTRACIÓN
+      </span>
+
+      <h1>
+        Reservas
+      </h1>
+
+      <p>
+        Revisa las próximas horas reservadas
+        de Garridos Barber.
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="btn-recargar"
+      (click)="cargarReservas()"
+      [disabled]="cargando"
+    >
+
+      @if (cargando) {
+        Cargando...
+      } @else {
+        Actualizar
+      }
+
+    </button>
+
+  </div>
+
+
+  @if (error) {
+
+    <div class="mensaje-error">
+
+      {{ error }}
+
+    </div>
+
+  }
+
+
+  @if (
+    cargando &&
+    reservas.length === 0
+    ) {
+
+    <div class="estado">
+
+      <p>
+        Cargando reservas...
+      </p>
+
+    </div>
+
+  } @else if (
+    !cargando &&
+    reservas.length === 0
+    ) {
+
+    <div class="estado">
+
+      <h2>
+        No hay reservas
+      </h2>
+
+      <p>
+        Las nuevas reservas aparecerán aquí.
+      </p>
+
+    </div>
+
+  } @else {
+
+    <div class="tabla-contenedor">
+
+      <table>
+
+        <thead>
+
+        <tr>
+
+          <th>
+            ID
+          </th>
+
+          <th>
+            Fecha
+          </th>
+
+          <th>
+            Hora
+          </th>
+
+          <th>
+            Cliente
+          </th>
+
+          <th>
+            Teléfono
+          </th>
+
+          <th>
+            Estado
+          </th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          @for (
+            reserva of reservas;
+            track reserva.id
+            ) {
+
+            <tr>
+
+              <td
+                data-label="ID"
+              >
+                #{{ reserva.id }}
+              </td>
+
+
+              <td
+                data-label="Fecha"
+              >
+                {{
+                  formatearFecha(
+                    reserva.fecha
+                  )
+                }}
+              </td>
+
+
+              <td
+                data-label="Hora"
+              >
+
+                <strong>
+                  {{ reserva.hora }}
+                </strong>
+
+              </td>
+
+
+              <td
+                data-label="Cliente"
+              >
+
+                {{
+                  reserva.nombre
+                }}
+
+                {{
+                  reserva.apellido
+                }}
+
+              </td>
+
+
+              <td
+                data-label="Teléfono"
+              >
+
+                {{ reserva.telefono }}
+
+              </td>
+
+
+              <td
+                data-label="Estado"
+              >
+
+                <span
+                  class="estado-reserva"
+                  [class.confirmada]="
+                    reserva.estado ===
+                    'confirmada'
+                  "
+                >
+
+                  {{ reserva.estado }}
+
+                </span>
+
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  }
+
+</section>
