@@ -271,7 +271,17 @@
 
               <!-- SIN HORARIOS -->
 
-            @if (
+            @if (cargandoHorarios) {
+
+              <div class="cargando-horarios">
+
+                <p>
+                  Consultando horarios disponibles...
+                </p>
+
+              </div>
+
+            } @else if (
               horariosDisponibles.length === 0
               ) {
 
@@ -295,6 +305,7 @@
             <!-- LISTA DE HORAS -->
 
             @if (
+              !cargandoHorarios &&
               horariosDisponibles.length > 0
               ) {
 

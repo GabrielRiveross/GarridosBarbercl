@@ -168,6 +168,21 @@
     var(--color-dorado);
   }
 
+  .cargando-horarios {
+    margin-top: 25px;
+    padding: 20px;
+    text-align: center;
+    background: #151515;
+    border: 1px solid #292929;
+    border-radius: 4px;
+
+    p {
+      margin: 0;
+      color: var(--color-gris);
+      font-size: 0.95rem;
+    }
+  }
+
   &.seleccionado {
     background:
       var(--color-dorado);

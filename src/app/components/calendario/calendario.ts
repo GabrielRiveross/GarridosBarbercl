@@ -84,9 +84,13 @@ export class Calendario implements OnInit {
 
   guardandoReserva = false;
 
+  cargandoHorarios = false;
+
   mensajeReserva = '';
 
   errorReserva = '';
+
+
 
 
   /*
@@ -468,6 +472,8 @@ export class Calendario implements OnInit {
 
     if (!this.fechaSeleccionada) {
 
+      this.cargandoHorarios = false;
+
       this.horariosDisponibles = [];
 
       return;
@@ -645,6 +651,8 @@ export class Calendario implements OnInit {
 
           }
 
+          this.cargandoHorarios = false;
+
 
           const fechaActualSeleccionada =
             this.formatearFecha(
@@ -660,6 +668,7 @@ export class Calendario implements OnInit {
             return;
 
           }
+
 
 
           /*
@@ -699,6 +708,7 @@ export class Calendario implements OnInit {
 
           }
 
+          this.cargandoHorarios = false;
 
           this.horariosDisponibles = [];
 
