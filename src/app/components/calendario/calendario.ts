@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   OnInit
 } from '@angular/core';
@@ -175,7 +176,10 @@ export class Calendario implements OnInit {
 
   constructor(
     private reservasService:
-    ReservasService
+    ReservasService,
+
+    private cdr:
+    ChangeDetectorRef
   ) {}
 
 
@@ -669,6 +673,11 @@ export class Calendario implements OnInit {
                   .horasOcupadas
                   .includes(hora)
             );
+            /*
+            * Forzar actualización
+            * inmediata de la interfaz.
+            */
+          this.cdr.detectChanges();
 
         },
 
@@ -697,7 +706,9 @@ export class Calendario implements OnInit {
           this.errorReserva =
             'No fue posible cargar los horarios disponibles.';
 
+          this.cdr.detectChanges();
         }
+
 
       });
 
@@ -950,6 +961,8 @@ export class Calendario implements OnInit {
 
             this.cargarHorarios();
 
+            this.cdr.detectChanges();
+
 
             return;
 
@@ -981,6 +994,8 @@ export class Calendario implements OnInit {
 
             this.cargarHorarios();
 
+            this.cdr.detectChanges();
+
 
             return;
 
@@ -993,6 +1008,8 @@ export class Calendario implements OnInit {
 
           this.errorReserva =
             'No se pudo realizar la reserva. Inténtalo nuevamente.';
+
+          this.cdr.detectChanges();
 
         }
 
