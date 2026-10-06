@@ -599,6 +599,258 @@ function validarAnticipacion(
 
 }
 
+type AppEnv = Env & {
+  ADMIN_PASSWORD: string;
+  ADMIN_SESSION_SECRET: string;
+};
+
+
+const ADMIN_COOKIE =
+  'admin_session';
+
+
+const SESSION_DURATION_SECONDS =
+  60 * 60 * 12; // 12 horas
+
+
+/*
+ * ========================================
+ * BASE64 URL
+ * ========================================
+ */
+
+function arrayBufferToBase64Url(
+  buffer: ArrayBuffer
+): string {
+
+  const bytes =
+    new Uint8Array(buffer);
+
+  let binary = '';
+
+  for (
+    const byte of bytes
+    ) {
+    binary +=
+      String.fromCharCode(byte);
+  }
+
+  return btoa(binary)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '');
+
+}
+
+
+/*
+ * ========================================
+ * FIRMAR SESIÓN
+ * ========================================
+ */
+
+async function firmarSesion(
+  expiracion: number,
+  secret: string
+): Promise<string> {
+
+  const encoder =
+    new TextEncoder();
+
+
+  const key =
+    await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      {
+        name: 'HMAC',
+        hash: 'SHA-256'
+      },
+      false,
+      [
+        'sign'
+      ]
+    );
+
+
+  const firma =
+    await crypto.subtle.sign(
+      'HMAC',
+      key,
+      encoder.encode(
+        String(expiracion)
+      )
+    );
+
+
+  return (
+    `${expiracion}.` +
+    arrayBufferToBase64Url(
+      firma
+    )
+  );
+
+}
+
+
+/*
+ * ========================================
+ * VERIFICAR SESIÓN
+ * ========================================
+ */
+
+async function verificarSesion(
+  token: string | null,
+  secret: string
+): Promise<boolean> {
+
+  if (!token) {
+    return false;
+  }
+
+
+  const partes =
+    token.split('.');
+
+
+  if (
+    partes.length !== 2
+  ) {
+    return false;
+  }
+
+
+  const expiracion =
+    Number(
+      partes[0]
+    );
+
+
+  const firmaRecibida =
+    partes[1];
+
+
+  if (
+    !Number.isFinite(
+      expiracion
+    )
+  ) {
+    return false;
+  }
+
+
+  const ahora =
+    Math.floor(
+      Date.now() / 1000
+    );
+
+
+  if (
+    expiracion <= ahora
+  ) {
+    return false;
+  }
+
+
+  const tokenEsperado =
+    await firmarSesion(
+      expiracion,
+      secret
+    );
+
+
+  const firmaEsperada =
+    tokenEsperado
+      .split('.')[1];
+
+
+  return (
+    firmaRecibida ===
+    firmaEsperada
+  );
+
+}
+
+
+/*
+ * ========================================
+ * LEER COOKIE
+ * ========================================
+ */
+
+function obtenerCookie(
+  request: Request,
+  nombre: string
+): string | null {
+
+  const cookies =
+    request.headers
+      .get('Cookie');
+
+
+  if (!cookies) {
+    return null;
+  }
+
+
+  const partes =
+    cookies.split(';');
+
+
+  for (
+    const parte of partes
+    ) {
+
+    const [
+      clave,
+      ...valorPartes
+    ] =
+      parte
+        .trim()
+        .split('=');
+
+
+    if (
+      clave === nombre
+    ) {
+
+      return valorPartes
+        .join('=');
+
+    }
+
+  }
+
+
+  return null;
+
+}
+
+
+/*
+ * ========================================
+ * COMPROBAR ADMIN
+ * ========================================
+ */
+
+async function esAdmin(
+  request: Request,
+  env: AppEnv
+): Promise<boolean> {
+
+  const token =
+    obtenerCookie(
+      request,
+      ADMIN_COOKIE
+    );
+
+
+  return verificarSesion(
+    token,
+    env.ADMIN_SESSION_SECRET
+  );
+
+}
 
 /*
  * ========================================
@@ -610,7 +862,7 @@ export default {
 
   async fetch(
     request: Request,
-    env: Env
+    env: AppEnv
   ) {
 
 
@@ -618,6 +870,217 @@ export default {
       new URL(
         request.url
       );
+
+    /*
+ * ========================================
+ * ADMIN - LOGIN
+ *
+ * POST /api/admin/login
+ * ========================================
+ */
+
+    if (
+      url.pathname ===
+      '/api/admin/login' &&
+
+      request.method === 'POST'
+    ) {
+
+      try {
+
+        const body =
+          await request.json<{
+            password?: string;
+          }>();
+
+
+        if (
+          !body.password
+        ) {
+
+          return Response.json(
+            {
+              ok: false,
+              mensaje:
+                'Debes ingresar la contraseña.'
+            },
+            {
+              status: 400
+            }
+          );
+
+        }
+
+
+        if (
+          body.password !==
+          env.ADMIN_PASSWORD
+        ) {
+
+          return Response.json(
+            {
+              ok: false,
+              mensaje:
+                'Contraseña incorrecta.'
+            },
+            {
+              status: 401
+            }
+          );
+
+        }
+
+
+        const ahora =
+          Math.floor(
+            Date.now() / 1000
+          );
+
+
+        const expiracion =
+          ahora +
+          SESSION_DURATION_SECONDS;
+
+
+        const token =
+          await firmarSesion(
+            expiracion,
+            env.ADMIN_SESSION_SECRET
+          );
+
+
+        return Response.json(
+          {
+            ok: true,
+            mensaje:
+              'Sesión iniciada correctamente.'
+          },
+          {
+            headers: {
+              'Set-Cookie':
+                `${ADMIN_COOKIE}=${token}; ` +
+                `HttpOnly; Secure; ` +
+                `SameSite=Strict; Path=/; ` +
+                `Max-Age=${SESSION_DURATION_SECONDS}`
+            }
+          }
+        );
+
+      } catch {
+
+        return Response.json(
+          {
+            ok: false,
+            mensaje:
+              'Solicitud de acceso inválida.'
+          },
+          {
+            status: 400
+          }
+        );
+
+      }
+
+    }
+
+    /*
+ * ========================================
+ * ADMIN - COMPROBAR SESIÓN
+ *
+ * GET /api/admin/session
+ * ========================================
+ */
+
+    if (
+      url.pathname ===
+      '/api/admin/session' &&
+
+      request.method === 'GET'
+    ) {
+
+      const autenticado =
+        await esAdmin(
+          request,
+          env
+        );
+
+
+      return Response.json({
+        ok: true,
+        autenticado
+      });
+
+    }
+
+    /*
+ * ========================================
+ * ADMIN - CERRAR SESIÓN
+ *
+ * POST /api/admin/logout
+ * ========================================
+ */
+
+    if (
+      url.pathname ===
+      '/api/admin/logout' &&
+
+      request.method === 'POST'
+    ) {
+
+      return Response.json(
+        {
+          ok: true,
+          mensaje:
+            'Sesión cerrada correctamente.'
+        },
+        {
+          headers: {
+            'Set-Cookie':
+              `${ADMIN_COOKIE}=; ` +
+              `HttpOnly; Secure; ` +
+              `SameSite=Strict; Path=/; ` +
+              `Max-Age=0`
+          }
+        }
+      );
+
+    }
+
+    /*
+ * ========================================
+ * PROTEGER RUTAS ADMIN
+ * ========================================
+ */
+
+    if (
+      url.pathname.startsWith(
+        '/api/admin/'
+      )
+    ) {
+
+      const autenticado =
+        await esAdmin(
+          request,
+          env
+        );
+
+
+      if (!autenticado) {
+
+        return Response.json(
+          {
+            ok: false,
+            mensaje:
+              'No autorizado.'
+          },
+          {
+            status: 401
+          }
+        );
+
+      }
+
+    }
 
 
     /*
@@ -2066,7 +2529,5 @@ export default {
         status: 404
       }
     );
-
   }
-
 };
