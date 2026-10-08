@@ -80,6 +80,21 @@ interface RespuestaGeneral {
 }
 
 
+interface SessionResponse {
+
+  ok: boolean;
+
+  autenticado: boolean;
+
+}
+
+
+/*
+ * ========================================
+ * COMPONENTE
+ * ========================================
+ */
+
 @Component({
 
   selector: 'app-admin',
@@ -96,6 +111,23 @@ interface RespuestaGeneral {
 })
 export class Admin
   implements OnInit {
+
+
+  /*
+   * ========================================
+   * SESIÓN
+   * ========================================
+   */
+
+  comprobandoSesion = true;
+
+  autenticado = false;
+
+  iniciandoSesion = false;
+
+  cerrandoSesion = false;
+
+  password = '';
 
 
   /*
@@ -215,6 +247,278 @@ export class Admin
 
   ngOnInit(): void {
 
+    this.comprobarSesion();
+
+  }
+
+
+  /*
+   * ========================================
+   * COMPROBAR SESIÓN
+   * ========================================
+   */
+
+  comprobarSesion(): void {
+
+
+    this.comprobandoSesion =
+      true;
+
+
+    this.error = '';
+
+
+    this.http
+
+      .get<SessionResponse>(
+        '/api/admin/session'
+      )
+
+      .subscribe({
+
+
+        next: response => {
+
+
+          this.autenticado =
+            response.autenticado;
+
+
+          this.comprobandoSesion =
+            false;
+
+
+          if (
+            this.autenticado
+          ) {
+
+            this.cargarDatosAdmin();
+
+          }
+
+
+          this.cdr
+            .detectChanges();
+
+        },
+
+
+        error: error => {
+
+
+          console.error(
+            'Error al comprobar sesión:',
+            error
+          );
+
+
+          this.autenticado =
+            false;
+
+
+          this.comprobandoSesion =
+            false;
+
+
+          this.error =
+            'No fue posible comprobar la sesión.';
+
+
+          this.cdr
+            .detectChanges();
+
+        }
+
+      });
+
+  }
+
+
+  /*
+   * ========================================
+   * INICIAR SESIÓN
+   * ========================================
+   */
+
+  iniciarSesion(): void {
+
+
+    if (
+      !this.password.trim()
+    ) {
+
+      this.error =
+        'Debes ingresar la contraseña.';
+
+
+      this.cdr
+        .detectChanges();
+
+
+      return;
+
+    }
+
+
+    this.iniciandoSesion =
+      true;
+
+
+    this.mensaje = '';
+
+    this.error = '';
+
+
+    this.http
+
+      .post<RespuestaGeneral>(
+        '/api/admin/login',
+        {
+          password:
+          this.password
+        }
+      )
+
+      .subscribe({
+
+
+        next: response => {
+
+
+          this.iniciandoSesion =
+            false;
+
+
+          this.autenticado =
+            true;
+
+
+          this.password = '';
+
+
+          this.mensaje =
+            response.mensaje;
+
+
+          this.cargarDatosAdmin();
+
+
+          this.cdr
+            .detectChanges();
+
+        },
+
+
+        error: error => {
+
+
+          this.iniciandoSesion =
+            false;
+
+
+          this.autenticado =
+            false;
+
+
+          this.error =
+            error.error?.mensaje ??
+            'No fue posible iniciar sesión.';
+
+
+          this.cdr
+            .detectChanges();
+
+        }
+
+      });
+
+  }
+
+
+  /*
+   * ========================================
+   * CERRAR SESIÓN
+   * ========================================
+   */
+
+  cerrarSesion(): void {
+
+
+    this.cerrandoSesion =
+      true;
+
+
+    this.mensaje = '';
+
+    this.error = '';
+
+
+    this.http
+
+      .post<RespuestaGeneral>(
+        '/api/admin/logout',
+        {}
+      )
+
+      .subscribe({
+
+
+        next: response => {
+
+
+          this.cerrandoSesion =
+            false;
+
+
+          this.autenticado =
+            false;
+
+
+          this.reservas = [];
+
+          this.bloqueos = [];
+
+
+          this.mensaje =
+            response.mensaje;
+
+
+          this.cdr
+            .detectChanges();
+
+        },
+
+
+        error: error => {
+
+
+          this.cerrandoSesion =
+            false;
+
+
+          this.error =
+            error.error?.mensaje ??
+            'No fue posible cerrar sesión.';
+
+
+          this.cdr
+            .detectChanges();
+
+        }
+
+      });
+
+  }
+
+
+  /*
+   * ========================================
+   * CARGAR DATOS ADMIN
+   * ========================================
+   */
+
+  cargarDatosAdmin(): void {
+
     this.cargarReservas();
 
     this.cargarBloqueos();
@@ -229,6 +533,15 @@ export class Admin
    */
 
   cargarReservas(): void {
+
+
+    if (
+      !this.autenticado
+    ) {
+
+      return;
+
+    }
 
 
     this.cargando = true;
@@ -275,11 +588,23 @@ export class Admin
             false;
 
 
-          this.reservas = [];
+          if (
+            error.status === 401
+          ) {
+
+            this.autenticado =
+              false;
 
 
-          this.error =
-            'No fue posible cargar las reservas.';
+            this.error =
+              'La sesión ha expirado.';
+
+          } else {
+
+            this.error =
+              'No fue posible cargar las reservas.';
+
+          }
 
 
           this.cdr
@@ -372,9 +697,24 @@ export class Admin
             null;
 
 
-          this.error =
-            error.error?.mensaje ??
-            'No fue posible cancelar la reserva.';
+          if (
+            error.status === 401
+          ) {
+
+            this.autenticado =
+              false;
+
+
+            this.error =
+              'La sesión ha expirado.';
+
+          } else {
+
+            this.error =
+              error.error?.mensaje ??
+              'No fue posible cancelar la reserva.';
+
+          }
 
 
           this.cdr
@@ -394,6 +734,15 @@ export class Admin
    */
 
   cargarBloqueos(): void {
+
+
+    if (
+      !this.autenticado
+    ) {
+
+      return;
+
+    }
 
 
     this.cargandoBloqueos =
@@ -439,8 +788,23 @@ export class Admin
             false;
 
 
-          this.error =
-            'No fue posible cargar los horarios bloqueados.';
+          if (
+            error.status === 401
+          ) {
+
+            this.autenticado =
+              false;
+
+
+            this.error =
+              'La sesión ha expirado.';
+
+          } else {
+
+            this.error =
+              'No fue posible cargar los horarios bloqueados.';
+
+          }
 
 
           this.cdr
@@ -460,6 +824,15 @@ export class Admin
    */
 
   crearBloqueo(): void {
+
+
+    if (
+      !this.autenticado
+    ) {
+
+      return;
+
+    }
 
 
     if (
@@ -530,10 +903,6 @@ export class Admin
           this.motivoBloqueo = '';
 
 
-          /*
-           * Volvemos a consultar D1.
-           */
-
           this.cargarBloqueos();
 
 
@@ -550,9 +919,24 @@ export class Admin
             false;
 
 
-          this.error =
-            error.error?.mensaje ??
-            'No fue posible bloquear el horario.';
+          if (
+            error.status === 401
+          ) {
+
+            this.autenticado =
+              false;
+
+
+            this.error =
+              'La sesión ha expirado.';
+
+          } else {
+
+            this.error =
+              error.error?.mensaje ??
+              'No fue posible bloquear el horario.';
+
+          }
 
 
           this.cdr
@@ -574,6 +958,15 @@ export class Admin
   eliminarBloqueo(
     bloqueo: BloqueoAdmin
   ): void {
+
+
+    if (
+      !this.autenticado
+    ) {
+
+      return;
+
+    }
 
 
     const confirmar =
@@ -618,11 +1011,6 @@ export class Admin
             response.mensaje;
 
 
-          /*
-           * Lo quitamos de la vista
-           * inmediatamente.
-           */
-
           this.bloqueos =
             this.bloqueos.filter(
               item =>
@@ -644,9 +1032,24 @@ export class Admin
             null;
 
 
-          this.error =
-            error.error?.mensaje ??
-            'No fue posible eliminar el bloqueo.';
+          if (
+            error.status === 401
+          ) {
+
+            this.autenticado =
+              false;
+
+
+            this.error =
+              'La sesión ha expirado.';
+
+          } else {
+
+            this.error =
+              error.error?.mensaje ??
+              'No fue posible eliminar el bloqueo.';
+
+          }
 
 
           this.cdr
@@ -696,10 +1099,6 @@ export class Admin
       );
 
 
-    /*
-     * Domingo
-     */
-
     if (
       fecha.getDay() === 0
     ) {
@@ -716,20 +1115,14 @@ export class Admin
 
   /*
    * ========================================
-   * CAMBIAR FECHA DEL BLOQUEO
+   * CAMBIO DE FECHA
    * ========================================
    */
 
   cambiarFechaBloqueo(): void {
 
 
-    /*
-     * Quitamos la hora anterior porque
-     * puede no ser válida para el nuevo día.
-     */
-
     this.horaBloqueo = '';
-
 
     this.mensaje = '';
 
@@ -747,10 +1140,9 @@ export class Admin
   get fechaMinima(): string {
 
 
-    return this
-      .formatearFechaInput(
-        new Date()
-      );
+    return this.formatearFechaInput(
+      new Date()
+    );
 
   }
 
@@ -773,19 +1165,16 @@ export class Admin
     );
 
 
-    return this
-      .formatearFechaInput(
-        fecha
-      );
+    return this.formatearFechaInput(
+      fecha
+    );
 
   }
 
 
   /*
    * ========================================
-   * FORMATEAR FECHA PARA INPUT
-   *
-   * YYYY-MM-DD
+   * FORMATO INPUT
    * ========================================
    */
 
