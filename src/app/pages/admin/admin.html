@@ -1,38 +1,37 @@
-<section class="admin">
-
-  <!-- ========================= -->
-  <!-- ENCABEZADO -->
-  <!-- ========================= -->
+<section class="admin-page">
 
   <div class="admin-header">
 
     <div>
 
-      <span class="subtitulo">
-        ADMINISTRACIÓN
-      </span>
+      <p class="admin-kicker">
+        Panel administrativo
+      </p>
 
       <h1>
-        Reservas
+        Gestión de reservas
       </h1>
 
-      <p>
-        Revisa y administra las reservas
-        de Garridos Barber.
+      <p class="admin-description">
+        Revisa reservas, cancela horas y bloquea horarios manualmente.
       </p>
 
     </div>
 
+
     <button
       type="button"
-      class="btn-recargar"
-      (click)="cargarReservas()"
-      [disabled]="cargando"
+      class="btn-secundario"
+      (click)="cargarReservas(); cargarBloqueos()"
+      [disabled]="cargando || cargandoBloqueos"
     >
 
-      @if (cargando) {
+      @if (
+        cargando ||
+        cargandoBloqueos
+        ) {
 
-        Cargando...
+        Actualizando...
 
       } @else {
 
@@ -45,10 +44,6 @@
   </div>
 
 
-  <!-- ========================= -->
-  <!-- MENSAJE DE ÉXITO -->
-  <!-- ========================= -->
-
   @if (mensaje) {
 
     <div class="mensaje-exito">
@@ -59,10 +54,6 @@
 
   }
 
-
-  <!-- ========================= -->
-  <!-- MENSAJE DE ERROR -->
-  <!-- ========================= -->
 
   @if (error) {
 
@@ -75,273 +66,549 @@
   }
 
 
-  <!-- ========================= -->
-  <!-- CARGANDO -->
-  <!-- ========================= -->
+  <!-- =====================================
+       RESERVAS
+       ===================================== -->
 
-  @if (
-    cargando &&
-    reservas.length === 0
-    ) {
+  <section class="admin-card">
 
-    <div class="estado">
+    <div class="card-header">
 
-      <p>
+      <div>
+
+        <p class="seccion-kicker">
+          Reservas
+        </p>
+
+        <h2>
+          Horas agendadas
+        </h2>
+
+      </div>
+
+    </div>
+
+
+    @if (cargando) {
+
+      <div class="estado-carga">
+
         Cargando reservas...
-      </p>
 
-    </div>
+      </div>
 
-  }
-
-
-  <!-- ========================= -->
-  <!-- SIN RESERVAS -->
-  <!-- ========================= -->
-
-  @if (
-    !cargando &&
-    reservas.length === 0
-    ) {
-
-    <div class="estado">
-
-      <h2>
-        No hay reservas
-      </h2>
-
-      <p>
-        Las nuevas reservas aparecerán aquí.
-      </p>
-
-    </div>
-
-  }
+    }
 
 
-  <!-- ========================= -->
-  <!-- TABLA -->
-  <!-- ========================= -->
+    @if (
+      !cargando &&
+      reservas.length === 0
+      ) {
 
-  @if (
-    reservas.length > 0
-    ) {
+      <div class="estado-vacio">
 
-    <div class="tabla-contenedor">
+        No hay reservas registradas.
 
-      <table>
+      </div>
 
-        <thead>
-
-        <tr>
-
-          <th>
-            ID
-          </th>
-
-          <th>
-            Fecha
-          </th>
-
-          <th>
-            Hora
-          </th>
-
-          <th>
-            Cliente
-          </th>
-
-          <th>
-            Teléfono
-          </th>
-
-          <th>
-            Estado
-          </th>
-
-          <th>
-            Acciones
-          </th>
-
-        </tr>
-
-        </thead>
-
-        <tbody>
-
-          @for (
-            reserva of reservas;
-            track reserva.id
-            ) {
-
-            <tr>
-
-              <!-- ID -->
-
-              <td
-                data-label="ID"
-              >
-
-                #{{ reserva.id }}
-
-              </td>
+    }
 
 
-              <!-- FECHA -->
+    @if (
+      !cargando &&
+      reservas.length > 0
+      ) {
 
-              <td
-                data-label="Fecha"
-              >
+      <div class="tabla-wrapper">
 
-                {{
-                  formatearFecha(
-                    reserva.fecha
-                  )
-                }}
+        <table class="admin-table">
 
-              </td>
+          <thead>
+
+          <tr>
+
+            <th>
+              ID
+            </th>
+
+            <th>
+              Fecha
+            </th>
+
+            <th>
+              Hora
+            </th>
+
+            <th>
+              Cliente
+            </th>
+
+            <th>
+              Teléfono
+            </th>
+
+            <th>
+              Estado
+            </th>
+
+            <th>
+              Acciones
+            </th>
+
+          </tr>
+
+          </thead>
 
 
-              <!-- HORA -->
+          <tbody>
 
-              <td
-                data-label="Hora"
-              >
+            @for (
+              reserva of reservas;
+              track reserva.id
+              ) {
 
-                <strong>
+              <tr>
 
+                <td>
+                  #{{ reserva.id }}
+                </td>
+
+
+                <td>
+                  {{ formatearFecha(reserva.fecha) }}
+                </td>
+
+
+                <td>
                   {{ reserva.hora }}
-
-                </strong>
-
-              </td>
+                </td>
 
 
-              <!-- CLIENTE -->
+                <td>
 
-              <td
-                data-label="Cliente"
-              >
+                  <strong>
 
-                {{
-                  reserva.nombre
-                }}
+                    {{ reserva.nombre }}
+                    {{ reserva.apellido }}
 
-                {{
-                  reserva.apellido
-                }}
+                  </strong>
 
-              </td>
+                </td>
 
 
-              <!-- TELÉFONO -->
+                <td>
 
-              <td
-                data-label="Teléfono"
-              >
+                  {{ reserva.telefono }}
 
-                {{ reserva.telefono }}
-
-              </td>
+                </td>
 
 
-              <!-- ESTADO -->
+                <td>
 
-              <td
-                data-label="Estado"
-              >
+                  <span
+                    class="estado"
+                    [class.estado-confirmada]="
+                      reserva.estado === 'confirmada'
+                    "
+                    [class.estado-cancelada]="
+                      reserva.estado === 'cancelada'
+                    "
+                  >
 
-                <span
-                  class="estado-reserva"
+                    {{ reserva.estado }}
 
-                  [class.confirmada]="
+                  </span>
+
+                </td>
+
+
+                <td>
+
+                  @if (
                     reserva.estado ===
                     'confirmada'
-                  "
+                    ) {
 
-                  [class.cancelada]="
+                    <button
+                      type="button"
+                      class="btn-cancelar"
+                      (click)="cancelarReserva(reserva)"
+                      [disabled]="
+                        cancelandoId === reserva.id
+                      "
+                    >
+
+                      @if (
+                        cancelandoId === reserva.id
+                        ) {
+
+                        Cancelando...
+
+                      } @else {
+
+                        Cancelar
+
+                      }
+
+                    </button>
+
+                  }
+
+
+                  @if (
                     reserva.estado ===
                     'cancelada'
-                  "
-                >
+                    ) {
 
-                  {{ reserva.estado }}
+                    <span class="sin-acciones">
 
-                </span>
+                      Sin acciones
 
-              </td>
+                    </span>
+
+                  }
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    }
+
+  </section>
 
 
-              <!-- ACCIONES -->
+  <!-- =====================================
+       BLOQUEAR HORARIO
+       ===================================== -->
 
-              <td
-                data-label="Acciones"
-              >
+  <section class="admin-card">
 
-                @if (
-                  reserva.estado ===
-                  'confirmada'
-                  ) {
+    <div class="card-header">
+
+      <div>
+
+        <p class="seccion-kicker">
+          Disponibilidad
+        </p>
+
+        <h2>
+          Bloquear horario
+        </h2>
+
+        <p class="card-description">
+          Usa esta opción cuando la barbería no pueda recibir reservas en una hora determinada.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <form
+      class="bloqueo-form"
+      (ngSubmit)="crearBloqueo()"
+    >
+
+      <div class="campo">
+
+        <label
+          for="fechaBloqueo"
+        >
+          Fecha
+        </label>
+
+
+        <input
+          id="fechaBloqueo"
+          name="fechaBloqueo"
+          type="date"
+          [(ngModel)]="fechaBloqueo"
+          [min]="fechaMinima"
+          [max]="fechaMaxima"
+          (change)="cambiarFechaBloqueo()"
+          required
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label
+          for="horaBloqueo"
+        >
+          Hora
+        </label>
+
+
+        <select
+          id="horaBloqueo"
+          name="horaBloqueo"
+          [(ngModel)]="horaBloqueo"
+          [disabled]="!fechaBloqueo"
+          required
+        >
+
+          <option
+            value=""
+            disabled
+          >
+            Selecciona una hora
+          </option>
+
+
+          @for (
+            hora of horariosParaBloqueo;
+            track hora
+            ) {
+
+            <option
+              [value]="hora"
+            >
+
+              {{ hora }}
+
+            </option>
+
+          }
+
+        </select>
+
+      </div>
+
+
+      <div class="campo campo-motivo">
+
+        <label
+          for="motivoBloqueo"
+        >
+          Motivo
+        </label>
+
+
+        <input
+          id="motivoBloqueo"
+          name="motivoBloqueo"
+          type="text"
+          [(ngModel)]="motivoBloqueo"
+          placeholder="Ej: colación, trámite, cierre..."
+          maxlength="100"
+        >
+
+      </div>
+
+
+      <div class="campo campo-boton">
+
+        <button
+          type="submit"
+          class="btn-bloquear"
+          [disabled]="
+            creandoBloqueo ||
+            !fechaBloqueo ||
+            !horaBloqueo
+          "
+        >
+
+          @if (
+            creandoBloqueo
+            ) {
+
+            Bloqueando...
+
+          } @else {
+
+            Bloquear horario
+
+          }
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </section>
+
+
+  <!-- =====================================
+       HORARIOS BLOQUEADOS
+       ===================================== -->
+
+  <section class="admin-card">
+
+    <div class="card-header">
+
+      <div>
+
+        <p class="seccion-kicker">
+          Bloqueos
+        </p>
+
+        <h2>
+          Horarios no disponibles
+        </h2>
+
+      </div>
+
+    </div>
+
+
+    @if (cargandoBloqueos) {
+
+      <div class="estado-carga">
+
+        Cargando horarios bloqueados...
+
+      </div>
+
+    }
+
+
+    @if (
+      !cargandoBloqueos &&
+      bloqueos.length === 0
+      ) {
+
+      <div class="estado-vacio">
+
+        No hay horarios bloqueados manualmente.
+
+      </div>
+
+    }
+
+
+    @if (
+      !cargandoBloqueos &&
+      bloqueos.length > 0
+      ) {
+
+      <div class="tabla-wrapper">
+
+        <table class="admin-table">
+
+          <thead>
+
+          <tr>
+
+            <th>
+              ID
+            </th>
+
+            <th>
+              Fecha
+            </th>
+
+            <th>
+              Hora
+            </th>
+
+            <th>
+              Motivo
+            </th>
+
+            <th>
+              Acciones
+            </th>
+
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              bloqueo of bloqueos;
+              track bloqueo.id
+              ) {
+
+              <tr>
+
+                <td>
+                  #{{ bloqueo.id }}
+                </td>
+
+
+                <td>
+                  {{ formatearFecha(bloqueo.fecha) }}
+                </td>
+
+
+                <td>
+
+                  <strong>
+                    {{ bloqueo.hora }}
+                  </strong>
+
+                </td>
+
+
+                <td>
+
+                  @if (bloqueo.motivo) {
+
+                    {{ bloqueo.motivo }}
+
+                  } @else {
+
+                    <span class="sin-motivo">
+                      Sin motivo
+                    </span>
+
+                  }
+
+                </td>
+
+
+                <td>
 
                   <button
                     type="button"
-                    class="btn-cancelar"
-
+                    class="btn-liberar"
+                    (click)="eliminarBloqueo(bloqueo)"
                     [disabled]="
-                      cancelandoId ===
-                      reserva.id
-                    "
-
-                    (click)="
-                      cancelarReserva(
-                        reserva
-                      )
+                      eliminandoBloqueoId === bloqueo.id
                     "
                   >
 
                     @if (
-                      cancelandoId ===
-                      reserva.id
+                      eliminandoBloqueoId === bloqueo.id
                       ) {
 
-                      Cancelando...
+                      Liberando...
 
                     } @else {
 
-                      Cancelar
+                      Liberar
 
                     }
 
                   </button>
 
-                }
+                </td>
 
+              </tr>
 
-                @if (
-                  reserva.estado ===
-                  'cancelada'
-                  ) {
+            }
 
-                  <span class="sin-accion">
+          </tbody>
 
-                    Sin acciones
+        </table>
 
-                  </span>
+      </div>
 
-                }
+    }
 
-              </td>
-
-            </tr>
-
-          }
-
-        </tbody>
-
-      </table>
-
-    </div>
-
-  }
+  </section>
 
 </section>

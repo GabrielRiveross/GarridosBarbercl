@@ -80,6 +80,7 @@ interface FechaHoraChile
 
 }
 
+
 interface ReservaAdmin {
 
   id: number;
@@ -102,19 +103,29 @@ interface ReservaAdmin {
 
 
 interface BloqueoAdmin {
+
   id: number;
+
   fecha: string;
+
   hora: string;
+
   motivo: string | null;
+
   created_at: string;
+
 }
+
 
 interface BloqueoRequest {
-  fecha: string;
-  hora: string;
-  motivo?: string;
-}
 
+  fecha: string;
+
+  hora: string;
+
+  motivo?: string;
+
+}
 
 
 /*
@@ -131,6 +142,7 @@ function obtenerFechaHoraChile():
     new Intl.DateTimeFormat(
       'en-CA',
       {
+
         timeZone:
         ZONA_HORARIA,
 
@@ -151,6 +163,7 @@ function obtenerFechaHoraChile():
 
         hourCycle:
           'h23'
+
       }
     );
 
@@ -163,8 +176,10 @@ function obtenerFechaHoraChile():
 
   const obtener =
     (
-      tipo: Intl.DateTimeFormatPartTypes
+      tipo:
+      Intl.DateTimeFormatPartTypes
     ): number => {
+
 
       const valor =
         partes.find(
@@ -232,10 +247,12 @@ function parsearFecha(
       coincidencia[1]
     );
 
+
   const mes =
     Number(
       coincidencia[2]
     );
+
 
   const dia =
     Number(
@@ -244,11 +261,8 @@ function parsearFecha(
 
 
   /*
-   * Comprobación real.
-   *
-   * Evita fechas como:
-   *
-   * 2026-02-31
+   * Evita fechas imposibles
+   * como 2026-02-31.
    */
 
   const fechaComprobacion =
@@ -297,12 +311,6 @@ function parsearFecha(
 /*
  * ========================================
  * CONVERTIR FECHA A NÚMERO DE DÍA
- *
- * Nos permite calcular:
- *
- * hoy
- * mañana
- * hoy + 7 días
  * ========================================
  */
 
@@ -355,14 +363,15 @@ function obtenerDiaSemana(
     );
 
 
-  return fechaUTC.getUTCDay();
+  return fechaUTC
+    .getUTCDay();
 
 }
 
 
 /*
  * ========================================
- * VALIDAR HORA
+ * VALIDAR FORMATO DE HORA
  * ========================================
  */
 
@@ -396,10 +405,6 @@ function obtenerHorariosPermitidos(
     );
 
 
-  /*
-   * Domingo
-   */
-
   if (
     diaSemana === 0
   ) {
@@ -408,10 +413,6 @@ function obtenerHorariosPermitidos(
 
   }
 
-
-  /*
-   * Lunes a sábado
-   */
 
   return HORARIOS_SEMANA;
 
@@ -422,11 +423,7 @@ function obtenerHorariosPermitidos(
  * ========================================
  * VALIDAR RANGO DE FECHA
  *
- * Permitimos:
- *
- * hoy
- * hasta
- * hoy + 7 días
+ * Hoy hasta hoy + 7 días.
  * ========================================
  */
 
@@ -482,8 +479,6 @@ function validarRangoFecha(
 /*
  * ========================================
  * VALIDAR 30 MINUTOS DE ANTICIPACIÓN
- *
- * Solo afecta si la reserva es hoy.
  * ========================================
  */
 
@@ -524,8 +519,7 @@ function validarAnticipacion(
 
 
   /*
-   * Una fecha futura ya cumple
-   * automáticamente la anticipación.
+   * Fechas futuras.
    */
 
   if (
@@ -539,8 +533,7 @@ function validarAnticipacion(
 
 
   /*
-   * Si es una fecha anterior,
-   * no permitimos reservar.
+   * Fechas pasadas.
    */
 
   if (
@@ -554,7 +547,7 @@ function validarAnticipacion(
 
 
   /*
-   * Reserva para HOY.
+   * Reserva para hoy.
    */
 
   const [
@@ -623,12 +616,17 @@ export default {
     /*
      * ========================================
      * TEST API
+     *
+     * GET /api/test
      * ========================================
      */
 
     if (
-      url.pathname === '/api/test' &&
-      request.method === 'GET'
+      url.pathname ===
+      '/api/test' &&
+
+      request.method ===
+      'GET'
     ) {
 
 
@@ -647,12 +645,17 @@ export default {
     /*
      * ========================================
      * TEST D1
+     *
+     * GET /api/test-db
      * ========================================
      */
 
     if (
-      url.pathname === '/api/test-db' &&
-      request.method === 'GET'
+      url.pathname ===
+      '/api/test-db' &&
+
+      request.method ===
+      'GET'
     ) {
 
 
@@ -688,7 +691,6 @@ export default {
      * DISPONIBILIDAD
      *
      * GET
-     *
      * /api/disponibilidad?fecha=YYYY-MM-DD
      * ========================================
      */
@@ -697,8 +699,10 @@ export default {
       url.pathname ===
       '/api/disponibilidad' &&
 
-      request.method === 'GET'
+      request.method ===
+      'GET'
     ) {
+
 
       const fecha =
         url.searchParams
@@ -707,11 +711,15 @@ export default {
 
       if (!fecha) {
 
+
         return Response.json(
           {
+
             ok: false,
+
             mensaje:
               'Debe indicar una fecha.'
+
           },
           {
             status: 400
@@ -729,11 +737,15 @@ export default {
 
       if (!fechaParseada) {
 
+
         return Response.json(
           {
+
             ok: false,
+
             mensaje:
               'La fecha indicada no es válida.'
+
           },
           {
             status: 400
@@ -749,11 +761,15 @@ export default {
         )
       ) {
 
+
         return Response.json(
           {
+
             ok: false,
+
             mensaje:
               'La fecha está fuera del período disponible para reservas.'
+
           },
           {
             status: 400
@@ -764,7 +780,7 @@ export default {
 
 
       /*
-       * RESERVAS CONFIRMADAS
+       * Reservas confirmadas.
        */
 
       const reservasResultado =
@@ -773,11 +789,11 @@ export default {
 
           .prepare(
             `
-        SELECT hora
-        FROM reservas
-        WHERE fecha = ?
-        AND estado = 'confirmada'
-        `
+            SELECT hora
+            FROM reservas
+            WHERE fecha = ?
+            AND estado = 'confirmada'
+            `
           )
 
           .bind(
@@ -790,7 +806,7 @@ export default {
 
 
       /*
-       * BLOQUEOS MANUALES
+       * Bloqueos administrativos.
        */
 
       const bloqueosResultado =
@@ -799,10 +815,10 @@ export default {
 
           .prepare(
             `
-        SELECT hora
-        FROM bloqueos
-        WHERE fecha = ?
-        `
+            SELECT hora
+            FROM bloqueos
+            WHERE fecha = ?
+            `
           )
 
           .bind(
@@ -815,27 +831,30 @@ export default {
 
 
       /*
-       * COMBINAR HORAS
+       * Unir reservas y bloqueos.
        */
 
-      const horasOcupadas =
-        [
-          ...reservasResultado.results
-            .map(
-              reserva =>
-                reserva.hora
-            ),
+      const horasOcupadas = [
 
-          ...bloqueosResultado.results
-            .map(
-              bloqueo =>
-                bloqueo.hora
-            )
-        ];
+        ...reservasResultado
+          .results
+          .map(
+            reserva =>
+              reserva.hora
+          ),
+
+        ...bloqueosResultado
+          .results
+          .map(
+            bloqueo =>
+              bloqueo.hora
+          )
+
+      ];
 
 
       /*
-       * Eliminar posibles duplicados.
+       * Eliminar duplicados.
        */
 
       const horasUnicas =
@@ -847,27 +866,33 @@ export default {
 
 
       return Response.json({
+
         ok: true,
+
         fecha,
+
         horasOcupadas:
         horasUnicas
+
       });
 
     }
 
+
     /*
- * ========================================
- * ADMIN - LISTAR RESERVAS
- *
- * GET /api/admin/reservas
- * ========================================
- */
+     * ========================================
+     * ADMIN - LISTAR RESERVAS
+     *
+     * GET /api/admin/reservas
+     * ========================================
+     */
 
     if (
       url.pathname ===
       '/api/admin/reservas' &&
 
-      request.method === 'GET'
+      request.method ===
+      'GET'
     ) {
 
 
@@ -880,22 +905,22 @@ export default {
 
             .prepare(
               `
-          SELECT
-            id,
-            nombre,
-            apellido,
-            telefono,
-            fecha,
-            hora,
-            estado,
-            created_at
+              SELECT
+                id,
+                nombre,
+                apellido,
+                telefono,
+                fecha,
+                hora,
+                estado,
+                created_at
 
-          FROM reservas
+              FROM reservas
 
-          ORDER BY
-            fecha ASC,
-            hora ASC
-          `
+              ORDER BY
+                fecha ASC,
+                hora ASC
+              `
             )
 
             .all<ReservaAdmin>();
@@ -938,515 +963,27 @@ export default {
 
     }
 
+
     /*
- * ========================================
- * ADMIN - CANCELAR RESERVA
- *
- * DELETE /api/admin/reservas/:id
- * ========================================
- */
+     * ========================================
+     * ADMIN - CANCELAR RESERVA
+     *
+     * DELETE /api/admin/reservas/:id
+     * ========================================
+     */
 
     if (
       url.pathname.startsWith(
         '/api/admin/reservas/'
       ) &&
-      request.method === 'DELETE'
+
+      request.method ===
+      'DELETE'
     ) {
+
 
       try {
 
-        const partes =
-          url.pathname.split('/');
-
-        const idTexto =
-          partes[
-          partes.length - 1
-            ];
-
-        const id =
-          Number(idTexto);
-
-
-        if (
-          !Number.isInteger(id) ||
-          id <= 0
-        ) {
-
-          return Response.json(
-            {
-              ok: false,
-              mensaje:
-                'El identificador de la reserva no es válido.'
-            },
-            {
-              status: 400
-            }
-          );
-
-        }
-
-
-        const reserva =
-          await env.DB
-            .prepare(
-              `
-          SELECT
-            id,
-            estado
-
-          FROM reservas
-
-          WHERE id = ?
-          `
-            )
-            .bind(id)
-            .first<{
-              id: number;
-              estado: string;
-            }>();
-
-
-        if (!reserva) {
-
-          return Response.json(
-            {
-              ok: false,
-              mensaje:
-                'La reserva no existe.'
-            },
-            {
-              status: 404
-            }
-          );
-
-        }
-
-
-        if (
-          reserva.estado ===
-          'cancelada'
-        ) {
-
-          return Response.json(
-            {
-              ok: false,
-              mensaje:
-                'La reserva ya está cancelada.'
-            },
-            {
-              status: 409
-            }
-          );
-
-        }
-
-
-        await env.DB
-          .prepare(
-            `
-        UPDATE reservas
-
-        SET estado = 'cancelada'
-
-        WHERE id = ?
-        `
-          )
-          .bind(id)
-          .run();
-
-
-        return Response.json({
-          ok: true,
-          mensaje:
-            'Reserva cancelada correctamente.'
-        });
-
-
-      } catch (error) {
-
-        console.error(
-          'Error al cancelar reserva:',
-          error
-        );
-
-
-        return Response.json(
-          {
-            ok: false,
-            mensaje:
-              'No se pudo cancelar la reserva.'
-          },
-          {
-            status: 500
-          }
-        );
-
-      }
-
-    }
-
-    /*
- * ========================================
- * ADMIN - LISTAR BLOQUEOS
- *
- * GET /api/admin/bloqueos
- * ========================================
- */
-
-    if (
-      url.pathname ===
-      '/api/admin/bloqueos' &&
-
-      request.method === 'GET'
-    ) {
-
-      try {
-
-        const resultado =
-
-          await env.DB
-
-            .prepare(
-              `
-          SELECT
-            id,
-            fecha,
-            hora,
-            motivo,
-            created_at
-
-          FROM bloqueos
-
-          ORDER BY
-            fecha ASC,
-            hora ASC
-          `
-            )
-
-            .all<BloqueoAdmin>();
-
-
-        return Response.json({
-          ok: true,
-          bloqueos:
-          resultado.results
-        });
-
-      } catch (error) {
-
-        console.error(
-          'Error al obtener bloqueos:',
-          error
-        );
-
-
-        return Response.json(
-          {
-            ok: false,
-            mensaje:
-              'No se pudieron obtener los bloqueos.'
-          },
-          {
-            status: 500
-          }
-        );
-
-      }
-
-    }
-
-    /*
- * ========================================
- * ADMIN - CREAR BLOQUEO
- *
- * POST /api/admin/bloqueos
- * ========================================
- */
-
-    if (
-      url.pathname ===
-      '/api/admin/bloqueos' &&
-
-      request.method === 'POST'
-    ) {
-
-      try {
-
-        const body =
-          await request
-            .json<BloqueoRequest>();
-
-
-        const {
-          fecha,
-          hora,
-          motivo
-        } = body;
-
-
-        if (
-          !fecha ||
-          !hora
-        ) {
-
-          return Response.json(
-            {
-              ok: false,
-              mensaje:
-                'Debe indicar fecha y hora.'
-            },
-            {
-              status: 400
-            }
-          );
-
-        }
-
-
-        const fechaParseada =
-          parsearFecha(
-            fecha
-          );
-
-
-        if (!fechaParseada) {
-
-          return Response.json(
-            {
-              ok: false,
-              mensaje:
-                'La fecha no es válida.'
-            },
-            {
-              status: 400
-            }
-          );
-
-        }
-
-
-        if (
-          !validarRangoFecha(
-            fechaParseada
-          )
-        ) {
-
-          return Response.json(
-            {
-              ok: false,
-              mensaje:
-                'Solo puedes bloquear horarios dentro del período disponible.'
-            },
-            {
-              status: 400
-            }
-          );
-
-        }
-
-
-        if (
-          !horaValida(
-            hora
-          )
-        ) {
-
-          return Response.json(
-            {
-              ok: false,
-              mensaje:
-                'La hora no es válida.'
-            },
-            {
-              status: 400
-            }
-          );
-
-        }
-
-
-        const horariosPermitidos =
-          obtenerHorariosPermitidos(
-            fechaParseada
-          );
-
-
-        if (
-          !horariosPermitidos
-            .includes(
-              hora
-            )
-        ) {
-
-          return Response.json(
-            {
-              ok: false,
-              mensaje:
-                'Ese horario no corresponde al horario de atención de ese día.'
-            },
-            {
-              status: 400
-            }
-          );
-
-        }
-
-
-        /*
-         * No permitir bloquear una hora
-         * que ya tiene una reserva confirmada.
-         */
-
-        const reservaExistente =
-
-          await env.DB
-
-            .prepare(
-              `
-          SELECT id
-          FROM reservas
-
-          WHERE fecha = ?
-          AND hora = ?
-          AND estado = 'confirmada'
-
-          LIMIT 1
-          `
-            )
-
-            .bind(
-              fecha,
-              hora
-            )
-
-            .first<{
-              id: number;
-            }>();
-
-
-        if (
-          reservaExistente
-        ) {
-
-          return Response.json(
-            {
-              ok: false,
-              mensaje:
-                'No puedes bloquear una hora que ya tiene una reserva confirmada.'
-            },
-            {
-              status: 409
-            }
-          );
-
-        }
-
-
-        const resultado =
-
-          await env.DB
-
-            .prepare(
-              `
-          INSERT INTO bloqueos
-          (
-            fecha,
-            hora,
-            motivo
-          )
-          VALUES (?, ?, ?)
-          `
-            )
-
-            .bind(
-              fecha,
-              hora,
-              motivo?.trim() || null
-            )
-
-            .run();
-
-
-        return Response.json(
-          {
-            ok: true,
-            mensaje:
-              'Horario bloqueado correctamente.',
-            id:
-            resultado.meta
-              .last_row_id
-          },
-          {
-            status: 201
-          }
-        );
-
-      } catch (error) {
-
-        const mensajeError =
-          error instanceof Error
-            ? error.message
-            : String(error);
-
-
-        if (
-          mensajeError.includes(
-            'UNIQUE constraint failed'
-          )
-        ) {
-
-          return Response.json(
-            {
-              ok: false,
-              mensaje:
-                'Ese horario ya está bloqueado.'
-            },
-            {
-              status: 409
-            }
-          );
-
-        }
-
-
-        console.error(
-          'Error al crear bloqueo:',
-          error
-        );
-
-
-        return Response.json(
-          {
-            ok: false,
-            mensaje:
-              'No se pudo bloquear el horario.'
-          },
-          {
-            status: 500
-          }
-        );
-
-      }
-
-    }
-
-    /*
- * ========================================
- * ADMIN - ELIMINAR BLOQUEO
- *
- * DELETE /api/admin/bloqueos/:id
- * ========================================
- */
-
-    if (
-      url.pathname.startsWith(
-        '/api/admin/bloqueos/'
-      ) &&
-
-      request.method === 'DELETE'
-    ) {
-
-      try {
 
         const partes =
           url.pathname
@@ -1470,11 +1007,625 @@ export default {
           id <= 0
         ) {
 
+
           return Response.json(
             {
+
               ok: false,
+
+              mensaje:
+                'El identificador de la reserva no es válido.'
+
+            },
+            {
+              status: 400
+            }
+          );
+
+        }
+
+
+        const reserva =
+
+          await env.DB
+
+            .prepare(
+              `
+              SELECT
+                id,
+                estado
+              FROM reservas
+              WHERE id = ?
+              `
+            )
+
+            .bind(id)
+
+            .first<{
+              id: number;
+              estado: string;
+            }>();
+
+
+        if (!reserva) {
+
+
+          return Response.json(
+            {
+
+              ok: false,
+
+              mensaje:
+                'La reserva no existe.'
+
+            },
+            {
+              status: 404
+            }
+          );
+
+        }
+
+
+        if (
+          reserva.estado ===
+          'cancelada'
+        ) {
+
+
+          return Response.json(
+            {
+
+              ok: false,
+
+              mensaje:
+                'La reserva ya está cancelada.'
+
+            },
+            {
+              status: 409
+            }
+          );
+
+        }
+
+
+        await env.DB
+
+          .prepare(
+            `
+            UPDATE reservas
+            SET estado = 'cancelada'
+            WHERE id = ?
+            `
+          )
+
+          .bind(id)
+
+          .run();
+
+
+        return Response.json({
+
+          ok: true,
+
+          mensaje:
+            'Reserva cancelada correctamente.'
+
+        });
+
+
+      } catch (error) {
+
+
+        console.error(
+          'Error al cancelar reserva:',
+          error
+        );
+
+
+        return Response.json(
+          {
+
+            ok: false,
+
+            mensaje:
+              'No se pudo cancelar la reserva.'
+
+          },
+          {
+            status: 500
+          }
+        );
+
+      }
+
+    }
+
+
+    /*
+     * ========================================
+     * ADMIN - LISTAR BLOQUEOS
+     *
+     * GET /api/admin/bloqueos
+     * ========================================
+     */
+
+    if (
+      url.pathname ===
+      '/api/admin/bloqueos' &&
+
+      request.method ===
+      'GET'
+    ) {
+
+
+      try {
+
+
+        const resultado =
+
+          await env.DB
+
+            .prepare(
+              `
+              SELECT
+                id,
+                fecha,
+                hora,
+                motivo,
+                created_at
+
+              FROM bloqueos
+
+              ORDER BY
+                fecha ASC,
+                hora ASC
+              `
+            )
+
+            .all<BloqueoAdmin>();
+
+
+        return Response.json({
+
+          ok: true,
+
+          bloqueos:
+          resultado.results
+
+        });
+
+
+      } catch (error) {
+
+
+        console.error(
+          'Error al obtener bloqueos:',
+          error
+        );
+
+
+        return Response.json(
+          {
+
+            ok: false,
+
+            mensaje:
+              'No se pudieron obtener los bloqueos.'
+
+          },
+          {
+            status: 500
+          }
+        );
+
+      }
+
+    }
+
+
+    /*
+     * ========================================
+     * ADMIN - CREAR BLOQUEO
+     *
+     * POST /api/admin/bloqueos
+     * ========================================
+     */
+
+    if (
+      url.pathname ===
+      '/api/admin/bloqueos' &&
+
+      request.method ===
+      'POST'
+    ) {
+
+
+      try {
+
+
+        const body =
+          await request
+            .json<BloqueoRequest>();
+
+
+        const {
+          fecha,
+          hora,
+          motivo
+        } = body;
+
+
+        /*
+         * Campos obligatorios.
+         */
+
+        if (
+          !fecha ||
+          !hora
+        ) {
+
+
+          return Response.json(
+            {
+
+              ok: false,
+
+              mensaje:
+                'Debe indicar fecha y hora.'
+
+            },
+            {
+              status: 400
+            }
+          );
+
+        }
+
+
+        /*
+         * Fecha válida.
+         */
+
+        const fechaParseada =
+          parsearFecha(
+            fecha
+          );
+
+
+        if (!fechaParseada) {
+
+
+          return Response.json(
+            {
+
+              ok: false,
+
+              mensaje:
+                'La fecha no es válida.'
+
+            },
+            {
+              status: 400
+            }
+          );
+
+        }
+
+
+        /*
+         * Solo dentro de los
+         * próximos siete días.
+         */
+
+        if (
+          !validarRangoFecha(
+            fechaParseada
+          )
+        ) {
+
+
+          return Response.json(
+            {
+
+              ok: false,
+
+              mensaje:
+                'Solo puedes bloquear horarios dentro del período disponible.'
+
+            },
+            {
+              status: 400
+            }
+          );
+
+        }
+
+
+        /*
+         * Formato de hora.
+         */
+
+        if (
+          !horaValida(
+            hora
+          )
+        ) {
+
+
+          return Response.json(
+            {
+
+              ok: false,
+
+              mensaje:
+                'La hora no es válida.'
+
+            },
+            {
+              status: 400
+            }
+          );
+
+        }
+
+
+        /*
+         * Hora permitida
+         * según el día.
+         */
+
+        const horariosPermitidos =
+          obtenerHorariosPermitidos(
+            fechaParseada
+          );
+
+
+        if (
+          !horariosPermitidos
+            .includes(
+              hora
+            )
+        ) {
+
+
+          return Response.json(
+            {
+
+              ok: false,
+
+              mensaje:
+                'Ese horario no corresponde al horario de atención de ese día.'
+
+            },
+            {
+              status: 400
+            }
+          );
+
+        }
+
+
+        /*
+         * No permitir bloquear una hora
+         * con reserva confirmada.
+         */
+
+        const reservaExistente =
+
+          await env.DB
+
+            .prepare(
+              `
+              SELECT id
+              FROM reservas
+              WHERE fecha = ?
+              AND hora = ?
+              AND estado = 'confirmada'
+              LIMIT 1
+              `
+            )
+
+            .bind(
+              fecha,
+              hora
+            )
+
+            .first<{
+              id: number;
+            }>();
+
+
+        if (
+          reservaExistente
+        ) {
+
+
+          return Response.json(
+            {
+
+              ok: false,
+
+              mensaje:
+                'No puedes bloquear una hora que ya tiene una reserva confirmada.'
+
+            },
+            {
+              status: 409
+            }
+          );
+
+        }
+
+
+        /*
+         * Crear bloqueo.
+         */
+
+        const resultado =
+
+          await env.DB
+
+            .prepare(
+              `
+              INSERT INTO bloqueos
+              (
+                fecha,
+                hora,
+                motivo
+              )
+              VALUES (?, ?, ?)
+              `
+            )
+
+            .bind(
+              fecha,
+              hora,
+              motivo?.trim() || null
+            )
+
+            .run();
+
+
+        return Response.json(
+          {
+
+            ok: true,
+
+            mensaje:
+              'Horario bloqueado correctamente.',
+
+            id:
+            resultado.meta
+              .last_row_id
+
+          },
+          {
+            status: 201
+          }
+        );
+
+
+      } catch (error) {
+
+
+        const mensajeError =
+
+          error instanceof Error
+
+            ? error.message
+
+            : String(
+              error
+            );
+
+
+        /*
+         * UNIQUE(fecha, hora)
+         */
+
+        if (
+          mensajeError.includes(
+            'UNIQUE constraint failed'
+          )
+        ) {
+
+
+          return Response.json(
+            {
+
+              ok: false,
+
+              mensaje:
+                'Ese horario ya está bloqueado.'
+
+            },
+            {
+              status: 409
+            }
+          );
+
+        }
+
+
+        console.error(
+          'Error al crear bloqueo:',
+          error
+        );
+
+
+        return Response.json(
+          {
+
+            ok: false,
+
+            mensaje:
+              'No se pudo bloquear el horario.'
+
+          },
+          {
+            status: 500
+          }
+        );
+
+      }
+
+    }
+
+
+    /*
+     * ========================================
+     * ADMIN - ELIMINAR BLOQUEO
+     *
+     * DELETE /api/admin/bloqueos/:id
+     * ========================================
+     */
+
+    if (
+      url.pathname.startsWith(
+        '/api/admin/bloqueos/'
+      ) &&
+
+      request.method ===
+      'DELETE'
+    ) {
+
+
+      try {
+
+
+        const partes =
+          url.pathname
+            .split('/');
+
+
+        const idTexto =
+          partes[
+          partes.length - 1
+            ];
+
+
+        const id =
+          Number(
+            idTexto
+          );
+
+
+        if (
+          !Number.isInteger(id) ||
+          id <= 0
+        ) {
+
+
+          return Response.json(
+            {
+
+              ok: false,
+
               mensaje:
                 'El identificador del bloqueo no es válido.'
+
             },
             {
               status: 400
@@ -1490,10 +1641,10 @@ export default {
 
             .prepare(
               `
-          SELECT id
-          FROM bloqueos
-          WHERE id = ?
-          `
+              SELECT id
+              FROM bloqueos
+              WHERE id = ?
+              `
             )
 
             .bind(id)
@@ -1505,11 +1656,15 @@ export default {
 
         if (!bloqueo) {
 
+
           return Response.json(
             {
+
               ok: false,
+
               mensaje:
                 'El bloqueo no existe.'
+
             },
             {
               status: 404
@@ -1523,9 +1678,9 @@ export default {
 
           .prepare(
             `
-        DELETE FROM bloqueos
-        WHERE id = ?
-        `
+            DELETE FROM bloqueos
+            WHERE id = ?
+            `
           )
 
           .bind(id)
@@ -1534,13 +1689,17 @@ export default {
 
 
         return Response.json({
+
           ok: true,
+
           mensaje:
             'Bloqueo eliminado correctamente.'
+
         });
 
 
       } catch (error) {
+
 
         console.error(
           'Error al eliminar bloqueo:',
@@ -1550,9 +1709,12 @@ export default {
 
         return Response.json(
           {
+
             ok: false,
+
             mensaje:
               'No se pudo eliminar el bloqueo.'
+
           },
           {
             status: 500
@@ -1562,6 +1724,7 @@ export default {
       }
 
     }
+
 
     /*
      * ========================================
@@ -1575,7 +1738,8 @@ export default {
       url.pathname ===
       '/api/reservas' &&
 
-      request.method === 'POST'
+      request.method ===
+      'POST'
     ) {
 
 
@@ -1583,7 +1747,7 @@ export default {
 
 
         /*
-         * LEER JSON
+         * Leer JSON.
          */
 
         const body =
@@ -1665,11 +1829,6 @@ export default {
               ''
             );
 
-
-        /*
-         * Después del trim,
-         * tampoco pueden quedar vacíos.
-         */
 
         if (
           nombreLimpio.length < 2 ||
@@ -1853,11 +2012,12 @@ export default {
 
         }
 
+
         /*
- * ========================================
- * COMPROBAR BLOQUEO MANUAL
- * ========================================
- */
+         * ========================================
+         * COMPROBAR BLOQUEO MANUAL
+         * ========================================
+         */
 
         const bloqueoExistente =
 
@@ -1865,13 +2025,11 @@ export default {
 
             .prepare(
               `
-                SELECT id
-                FROM bloqueos
-
-                WHERE fecha = ?
-                  AND hora = ?
-
-                  LIMIT 1
+              SELECT id
+              FROM bloqueos
+              WHERE fecha = ?
+              AND hora = ?
+              LIMIT 1
               `
             )
 
@@ -1889,11 +2047,15 @@ export default {
           bloqueoExistente
         ) {
 
+
           return Response.json(
             {
+
               ok: false,
+
               mensaje:
                 'Este horario no está disponible.'
+
             },
             {
               status: 409
@@ -1902,9 +2064,10 @@ export default {
 
         }
 
+
         /*
          * ========================================
-         * INSERTAR EN D1
+         * INSERTAR RESERVA
          * ========================================
          */
 
@@ -1970,10 +2133,6 @@ export default {
 
       } catch (error) {
 
-
-        /*
-         * Convertir error a texto.
-         */
 
         const mensajeError =
 
