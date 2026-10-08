@@ -23,13 +23,10 @@
 
     </div>
 
-
     <button
       type="button"
       class="btn-recargar"
-
       (click)="cargarReservas()"
-
       [disabled]="cargando"
     >
 
@@ -79,686 +76,272 @@
 
 
   <!-- ========================= -->
-  <!-- RESERVAS -->
+  <!-- CARGANDO -->
   <!-- ========================= -->
 
-  <div class="admin-bloque">
+  @if (
+    cargando &&
+    reservas.length === 0
+    ) {
 
-    <div class="bloque-header">
+    <div class="estado">
 
-      <div>
-
-        <span class="subtitulo">
-          RESERVAS
-        </span>
-
-        <h2>
-          Próximas reservas
-        </h2>
-
-      </div>
+      <p>
+        Cargando reservas...
+      </p>
 
     </div>
 
-
-    @if (
-      cargando &&
-      reservas.length === 0
-      ) {
-
-      <div class="estado">
-
-        <p>
-          Cargando reservas...
-        </p>
-
-      </div>
-
-    }
-
-
-    @if (
-      !cargando &&
-      reservas.length === 0
-      ) {
-
-      <div class="estado">
-
-        <h3>
-          No hay reservas
-        </h3>
-
-        <p>
-          Las nuevas reservas aparecerán aquí.
-        </p>
-
-      </div>
-
-    }
-
-
-    @if (
-      reservas.length > 0
-      ) {
-
-      <div class="tabla-contenedor">
-
-        <table>
-
-          <thead>
-
-          <tr>
-
-            <th>
-              ID
-            </th>
-
-            <th>
-              Fecha
-            </th>
-
-            <th>
-              Hora
-            </th>
-
-            <th>
-              Cliente
-            </th>
-
-            <th>
-              Teléfono
-            </th>
-
-            <th>
-              Estado
-            </th>
-
-            <th>
-              Acciones
-            </th>
-
-          </tr>
-
-          </thead>
-
-
-          <tbody>
-
-            @for (
-              reserva of reservas;
-              track reserva.id
-              ) {
-
-              <tr>
-
-                <td
-                  data-label="ID"
-                >
-                  #{{ reserva.id }}
-                </td>
-
-
-                <td
-                  data-label="Fecha"
-                >
-                  {{
-                    formatearFecha(
-                      reserva.fecha
-                    )
-                  }}
-                </td>
-
-
-                <td
-                  data-label="Hora"
-                >
-                  <strong>
-                    {{ reserva.hora }}
-                  </strong>
-                </td>
-
-
-                <td
-                  data-label="Cliente"
-                >
-                  {{
-                    reserva.nombre
-                  }}
-
-                  {{
-                    reserva.apellido
-                  }}
-                </td>
-
-
-                <td
-                  data-label="Teléfono"
-                >
-                  {{ reserva.telefono }}
-                </td>
-
-
-                <td
-                  data-label="Estado"
-                >
-
-                  <span
-                    class="estado-reserva"
-
-                    [class.confirmada]="
-                      reserva.estado ===
-                      'confirmada'
-                    "
-
-                    [class.cancelada]="
-                      reserva.estado ===
-                      'cancelada'
-                    "
-                  >
-
-                    {{ reserva.estado }}
-
-                  </span>
-
-                </td>
-
-
-                <td
-                  data-label="Acciones"
-                >
-
-                  @if (
-                    reserva.estado ===
-                    'confirmada'
-                    ) {
-
-                    <button
-                      type="button"
-                      class="btn-cancelar"
-
-                      [disabled]="
-                        cancelandoId ===
-                        reserva.id
-                      "
-
-                      (click)="
-                        cancelarReserva(
-                          reserva
-                        )
-                      "
-                    >
-
-                      @if (
-                        cancelandoId ===
-                        reserva.id
-                        ) {
-
-                        Cancelando...
-
-                      } @else {
-
-                        Cancelar
-
-                      }
-
-                    </button>
-
-                  }
-
-
-                  @if (
-                    reserva.estado ===
-                    'cancelada'
-                    ) {
-
-                    <span class="sin-accion">
-
-                      Sin acciones
-
-                    </span>
-
-                  }
-
-                </td>
-
-              </tr>
-
-            }
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    }
-
-  </div>
+  }
 
 
   <!-- ========================= -->
-  <!-- BLOQUEAR HORARIO -->
+  <!-- SIN RESERVAS -->
   <!-- ========================= -->
 
-  <div class="admin-bloque">
+  @if (
+    !cargando &&
+    reservas.length === 0
+    ) {
 
-    <div class="bloque-header">
+    <div class="estado">
 
-      <div>
+      <h2>
+        No hay reservas
+      </h2>
 
-        <span class="subtitulo">
-          DISPONIBILIDAD
-        </span>
-
-        <h2>
-          Bloquear horario
-        </h2>
-
-        <p>
-          Puedes bloquear manualmente una hora
-          para que deje de estar disponible.
-        </p>
-
-      </div>
+      <p>
+        Las nuevas reservas aparecerán aquí.
+      </p>
 
     </div>
 
-
-    <div class="form-bloqueo">
-
-
-      <!-- FECHA -->
-
-      <div class="campo">
-
-        <label
-          for="fechaBloqueo"
-        >
-          Fecha
-        </label>
+  }
 
 
-        <input
-          id="fechaBloqueo"
-          type="date"
+  <!-- ========================= -->
+  <!-- TABLA -->
+  <!-- ========================= -->
 
-          [(ngModel)]="
-            fechaBloqueo
-          "
+  @if (
+    reservas.length > 0
+    ) {
 
-          [min]="
-            fechaMinima
-          "
+    <div class="tabla-contenedor">
 
-          [max]="
-            fechaMaxima
-          "
+      <table>
 
-          (change)="
-            cambiarFechaBloqueo()
-          "
-        />
+        <thead>
 
-      </div>
+        <tr>
 
+          <th>
+            ID
+          </th>
 
-      <!-- HORA -->
+          <th>
+            Fecha
+          </th>
 
-      <div class="campo">
+          <th>
+            Hora
+          </th>
 
-        <label
-          for="horaBloqueo"
-        >
-          Hora
-        </label>
+          <th>
+            Cliente
+          </th>
 
+          <th>
+            Teléfono
+          </th>
 
-        <select
-          id="horaBloqueo"
+          <th>
+            Estado
+          </th>
 
-          [(ngModel)]="
-            horaBloqueo
-          "
+          <th>
+            Acciones
+          </th>
 
-          [disabled]="
-            !fechaBloqueo
-          "
-        >
+        </tr>
 
-          <option
-            value=""
-          >
-            Selecciona una hora
-          </option>
+        </thead>
 
+        <tbody>
 
           @for (
-            hora of horariosParaBloqueo;
-            track hora
+            reserva of reservas;
+            track reserva.id
             ) {
 
-            <option
-              [value]="hora"
-            >
+            <tr>
 
-              {{ hora }}
+              <!-- ID -->
 
-            </option>
+              <td
+                data-label="ID"
+              >
 
-          }
+                #{{ reserva.id }}
 
-        </select>
+              </td>
 
-      </div>
 
+              <!-- FECHA -->
 
-      <!-- MOTIVO -->
+              <td
+                data-label="Fecha"
+              >
 
-      <div class="campo campo-motivo">
+                {{
+                  formatearFecha(
+                    reserva.fecha
+                  )
+                }}
 
-        <label
-          for="motivoBloqueo"
-        >
-          Motivo
-        </label>
+              </td>
 
 
-        <input
-          id="motivoBloqueo"
-          type="text"
+              <!-- HORA -->
 
-          maxlength="100"
+              <td
+                data-label="Hora"
+              >
 
-          placeholder="
-            Ej: trámite personal
-          "
+                <strong>
 
-          [(ngModel)]="
-            motivoBloqueo
-          "
-        />
+                  {{ reserva.hora }}
 
-      </div>
+                </strong>
 
+              </td>
 
-      <!-- BOTÓN -->
 
-      <div class="campo campo-boton">
+              <!-- CLIENTE -->
 
-        <button
-          type="button"
-          class="btn-bloquear"
+              <td
+                data-label="Cliente"
+              >
 
-          [disabled]="
-            creandoBloqueo ||
-            !fechaBloqueo ||
-            !horaBloqueo
-          "
+                {{
+                  reserva.nombre
+                }}
 
-          (click)="
-            crearBloqueo()
-          "
-        >
+                {{
+                  reserva.apellido
+                }}
 
-          @if (
-            creandoBloqueo
-            ) {
+              </td>
 
-            Bloqueando...
 
-          } @else {
+              <!-- TELÉFONO -->
 
-            Bloquear horario
+              <td
+                data-label="Teléfono"
+              >
 
-          }
+                {{ reserva.telefono }}
 
-        </button>
+              </td>
 
-      </div>
 
-    </div>
+              <!-- ESTADO -->
 
-  </div>
+              <td
+                data-label="Estado"
+              >
 
+                <span
+                  class="estado-reserva"
 
-  <!-- ========================= -->
-  <!-- HORARIOS BLOQUEADOS -->
-  <!-- ========================= -->
+                  [class.confirmada]="
+                    reserva.estado ===
+                    'confirmada'
+                  "
 
-  <div class="admin-bloque">
-
-    <div class="bloque-header">
-
-      <div>
-
-        <span class="subtitulo">
-          HORARIOS BLOQUEADOS
-        </span>
-
-        <h2>
-          Bloqueos activos
-        </h2>
-
-        <p>
-          Estos horarios no aparecen
-          disponibles para los clientes.
-        </p>
-
-      </div>
-
-
-      <button
-        type="button"
-        class="btn-recargar"
-
-        (click)="
-          cargarBloqueos()
-        "
-
-        [disabled]="
-          cargandoBloqueos
-        "
-      >
-
-        @if (
-          cargandoBloqueos
-          ) {
-
-          Cargando...
-
-        } @else {
-
-          Actualizar
-
-        }
-
-      </button>
-
-    </div>
-
-
-    @if (
-      cargandoBloqueos &&
-      bloqueos.length === 0
-      ) {
-
-      <div class="estado">
-
-        <p>
-          Cargando bloqueos...
-        </p>
-
-      </div>
-
-    }
-
-
-    @if (
-      !cargandoBloqueos &&
-      bloqueos.length === 0
-      ) {
-
-      <div class="estado">
-
-        <h3>
-          No hay horarios bloqueados
-        </h3>
-
-        <p>
-          Los bloqueos que agregues
-          aparecerán aquí.
-        </p>
-
-      </div>
-
-    }
-
-
-    @if (
-      bloqueos.length > 0
-      ) {
-
-      <div class="tabla-contenedor">
-
-        <table>
-
-          <thead>
-
-          <tr>
-
-            <th>
-              ID
-            </th>
-
-            <th>
-              Fecha
-            </th>
-
-            <th>
-              Hora
-            </th>
-
-            <th>
-              Motivo
-            </th>
-
-            <th>
-              Acciones
-            </th>
-
-          </tr>
-
-          </thead>
-
-
-          <tbody>
-
-            @for (
-              bloqueo of bloqueos;
-              track bloqueo.id
-              ) {
-
-              <tr>
-
-                <td
-                  data-label="ID"
-                >
-                  #{{ bloqueo.id }}
-                </td>
-
-
-                <td
-                  data-label="Fecha"
-                >
-                  {{
-                    formatearFecha(
-                      bloqueo.fecha
-                    )
-                  }}
-                </td>
-
-
-                <td
-                  data-label="Hora"
+                  [class.cancelada]="
+                    reserva.estado ===
+                    'cancelada'
+                  "
                 >
 
-                  <strong>
-                    {{ bloqueo.hora }}
-                  </strong>
+                  {{ reserva.estado }}
 
-                </td>
+                </span>
 
-
-                <td
-                  data-label="Motivo"
-                >
-
-                  @if (
-                    bloqueo.motivo
-                    ) {
-
-                    {{ bloqueo.motivo }}
-
-                  } @else {
-
-                    <span class="sin-motivo">
-                      Sin motivo
-                    </span>
-
-                  }
-
-                </td>
+              </td>
 
 
-                <td
-                  data-label="Acciones"
-                >
+              <!-- ACCIONES -->
+
+              <td
+                data-label="Acciones"
+              >
+
+                @if (
+                  reserva.estado ===
+                  'confirmada'
+                  ) {
 
                   <button
                     type="button"
-                    class="btn-liberar"
+                    class="btn-cancelar"
 
                     [disabled]="
-                      eliminandoBloqueoId ===
-                      bloqueo.id
+                      cancelandoId ===
+                      reserva.id
                     "
 
                     (click)="
-                      eliminarBloqueo(
-                        bloqueo
+                      cancelarReserva(
+                        reserva
                       )
                     "
                   >
 
                     @if (
-                      eliminandoBloqueoId ===
-                      bloqueo.id
+                      cancelandoId ===
+                      reserva.id
                       ) {
 
-                      Liberando...
+                      Cancelando...
 
                     } @else {
 
-                      Liberar
+                      Cancelar
 
                     }
 
                   </button>
 
-                </td>
+                }
 
-              </tr>
 
-            }
+                @if (
+                  reserva.estado ===
+                  'cancelada'
+                  ) {
 
-          </tbody>
+                  <span class="sin-accion">
 
-        </table>
+                    Sin acciones
 
-      </div>
+                  </span>
 
-    }
+                }
 
-  </div>
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  }
 
 </section>
