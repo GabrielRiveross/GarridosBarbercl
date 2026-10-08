@@ -128,6 +128,16 @@ interface BloqueoRequest {
 }
 
 
+interface AppEnv
+  extends Env {
+
+  ADMIN_PASSWORD: string;
+
+  ADMIN_SESSION_SECRET: string;
+
+}
+
+
 /*
  * ========================================
  * OBTENER FECHA Y HORA DE CHILE
@@ -592,6 +602,267 @@ function validarAnticipacion(
 
 }
 
+/*
+ * ========================================
+ * CONFIGURACIÓN ADMIN
+ * ========================================
+ */
+
+const ADMIN_COOKIE =
+  'garridos_admin_session';
+
+
+const ADMIN_SESSION_DURATION =
+  60 * 60 * 12;
+
+/*
+ * 12 horas
+ */
+
+function convertirBase64Url(
+  buffer: ArrayBuffer
+): string {
+
+
+  const bytes =
+    new Uint8Array(
+      buffer
+    );
+
+
+  let texto = '';
+
+
+  for (
+    const byte of bytes
+    ) {
+
+    texto +=
+      String.fromCharCode(
+        byte
+      );
+
+  }
+
+
+  return btoa(
+    texto
+  )
+    .replace(
+      /\+/g,
+      '-'
+    )
+    .replace(
+      /\//g,
+      '_'
+    )
+    .replace(
+      /=+$/g,
+      ''
+    );
+
+}
+
+async function firmarSesion(
+  expiracion: number,
+  secret: string
+): Promise<string> {
+
+
+  const encoder =
+    new TextEncoder();
+
+
+  const clave =
+    await crypto.subtle
+      .importKey(
+        'raw',
+        encoder.encode(
+          secret
+        ),
+        {
+          name: 'HMAC',
+          hash: 'SHA-256'
+        },
+        false,
+        [
+          'sign'
+        ]
+      );
+
+
+  const firma =
+    await crypto.subtle
+      .sign(
+        'HMAC',
+        clave,
+        encoder.encode(
+          String(
+            expiracion
+          )
+        )
+      );
+
+
+  const firmaTexto =
+    convertirBase64Url(
+      firma
+    );
+
+
+  return (
+    `${expiracion}.${firmaTexto}`
+  );
+
+}
+
+function obtenerCookie(
+  request: Request,
+  nombre: string
+): string | null {
+
+
+  const encabezado =
+    request.headers
+      .get(
+        'Cookie'
+      );
+
+
+  if (!encabezado) {
+
+    return null;
+
+  }
+
+
+  const cookies =
+    encabezado
+      .split(';');
+
+
+  for (
+    const cookie of cookies
+    ) {
+
+
+    const [
+      clave,
+      ...valor
+    ] =
+      cookie
+        .trim()
+        .split('=');
+
+
+    if (
+      clave === nombre
+    ) {
+
+      return valor
+        .join('=');
+
+    }
+
+  }
+
+
+  return null;
+
+}
+
+async function verificarSesion(
+  token: string | null,
+  secret: string
+): Promise<boolean> {
+
+
+  if (!token) {
+
+    return false;
+
+  }
+
+
+  const partes =
+    token.split('.');
+
+
+  if (
+    partes.length !== 2
+  ) {
+
+    return false;
+
+  }
+
+
+  const expiracion =
+    Number(
+      partes[0]
+    );
+
+
+  if (
+    !Number.isFinite(
+      expiracion
+    )
+  ) {
+
+    return false;
+
+  }
+
+
+  const ahora =
+    Math.floor(
+      Date.now() /
+      1000
+    );
+
+
+  if (
+    expiracion <= ahora
+  ) {
+
+    return false;
+
+  }
+
+
+  const esperado =
+    await firmarSesion(
+      expiracion,
+      secret
+    );
+
+
+  return (
+    esperado === token
+  );
+
+}
+
+async function esAdministrador(
+  request: Request,
+  env: AppEnv
+): Promise<boolean> {
+
+
+  const token =
+    obtenerCookie(
+      request,
+      ADMIN_COOKIE
+    );
+
+
+  return verificarSesion(
+    token,
+    env.ADMIN_SESSION_SECRET
+  );
+
+}
+
 
 /*
  * ========================================
@@ -603,7 +874,7 @@ export default {
 
   async fetch(
     request: Request,
-    env: Env
+    env: AppEnv
   ) {
 
 
@@ -611,6 +882,247 @@ export default {
       new URL(
         request.url
       );
+
+    /*
+ * ========================================
+ * ADMIN LOGIN
+ *
+ * POST /api/admin/login
+ * ========================================
+ */
+
+    if (
+      url.pathname ===
+      '/api/admin/login' &&
+
+      request.method ===
+      'POST'
+    ) {
+
+
+      try {
+
+
+        const body =
+          await request.json<{
+            password?: string;
+          }>();
+
+
+        const password =
+          body.password ?? '';
+
+
+        if (
+          password !==
+          env.ADMIN_PASSWORD
+        ) {
+
+
+          return Response.json(
+            {
+
+              ok: false,
+
+              mensaje:
+                'Contraseña incorrecta.'
+
+            },
+            {
+              status: 401
+            }
+          );
+
+        }
+
+
+        const ahora =
+          Math.floor(
+            Date.now() /
+            1000
+          );
+
+
+        const expiracion =
+          ahora +
+          ADMIN_SESSION_DURATION;
+
+
+        const token =
+          await firmarSesion(
+            expiracion,
+            env.ADMIN_SESSION_SECRET
+          );
+
+
+        return Response.json(
+          {
+
+            ok: true,
+
+            mensaje:
+              'Sesión iniciada correctamente.'
+
+          },
+          {
+
+            headers: {
+
+              'Set-Cookie':
+                `${ADMIN_COOKIE}=${token}; ` +
+                `HttpOnly; ` +
+                `Secure; ` +
+                `SameSite=Strict; ` +
+                `Path=/; ` +
+                `Max-Age=${ADMIN_SESSION_DURATION}`
+
+            }
+
+          }
+        );
+
+
+      } catch {
+
+
+        return Response.json(
+          {
+
+            ok: false,
+
+            mensaje:
+              'Solicitud no válida.'
+
+          },
+          {
+            status: 400
+          }
+        );
+
+      }
+
+    }
+
+
+    /*
+ * ========================================
+ * ADMIN SESSION
+ *
+ * GET /api/admin/session
+ * ========================================
+ */
+
+    if (
+      url.pathname ===
+      '/api/admin/session' &&
+
+      request.method ===
+      'GET'
+    ) {
+
+
+      const autenticado =
+        await esAdministrador(
+          request,
+          env
+        );
+
+
+      return Response.json({
+
+        ok: true,
+
+        autenticado
+
+      });
+
+    }
+
+    /*
+ * ========================================
+ * ADMIN LOGOUT
+ *
+ * POST /api/admin/logout
+ * ========================================
+ */
+
+    if (
+      url.pathname ===
+      '/api/admin/logout' &&
+
+      request.method ===
+      'POST'
+    ) {
+
+
+      return Response.json(
+        {
+
+          ok: true,
+
+          mensaje:
+            'Sesión cerrada correctamente.'
+
+        },
+        {
+
+          headers: {
+
+            'Set-Cookie':
+              `${ADMIN_COOKIE}=; ` +
+              `HttpOnly; ` +
+              `Secure; ` +
+              `SameSite=Strict; ` +
+              `Path=/; ` +
+              `Max-Age=0`
+
+          }
+
+        }
+      );
+
+    }
+
+    /*
+ * ========================================
+ * PROTEGER API ADMIN
+ * ========================================
+ */
+
+    if (
+      url.pathname.startsWith(
+        '/api/admin/'
+      )
+    ) {
+
+
+      const autenticado =
+        await esAdministrador(
+          request,
+          env
+        );
+
+
+      if (!autenticado) {
+
+
+        return Response.json(
+          {
+
+            ok: false,
+
+            mensaje:
+              'No autorizado.'
+
+          },
+          {
+            status: 401
+          }
+        );
+
+      }
+
+    }
 
 
     /*
