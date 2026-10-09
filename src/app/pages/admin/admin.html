@@ -1,149 +1,37 @@
 <section class="admin-page">
 
-  <!-- =====================================
-       COMPROBANDO SESIÓN
-       ===================================== -->
 
   @if (comprobandoSesion) {
 
-    <div class="login-wrapper">
+    <div class="admin-loading">
 
-      <div class="login-card">
-
-        <p class="admin-kicker">
-          Administración
-        </p>
-
-        <h1>
-          Verificando sesión
-        </h1>
-
-        <p class="login-description">
-          Espera un momento...
-        </p>
-
-      </div>
+      Verificando sesión...
 
     </div>
 
   }
 
-
-  <!-- =====================================
-       LOGIN
-       ===================================== -->
 
   @if (
     !comprobandoSesion &&
     !autenticado
     ) {
 
-    <div class="login-wrapper">
-
-      <div class="login-card">
-
-        <p class="admin-kicker">
-          Garridos Barber
-        </p>
-
-        <h1>
-          Panel administrativo
-        </h1>
-
-        <p class="login-description">
-          Ingresa la contraseña para acceder a las reservas y bloqueos.
-        </p>
-
-
-        @if (mensaje) {
-
-          <div class="mensaje-exito">
-
-            {{ mensaje }}
-
-          </div>
-
-        }
-
-
-        @if (error) {
-
-          <div class="mensaje-error">
-
-            {{ error }}
-
-          </div>
-
-        }
-
-
-        <form
-          class="login-form"
-          (ngSubmit)="iniciarSesion()"
-        >
-
-          <div class="campo">
-
-            <label
-              for="adminPassword"
-            >
-              Contraseña
-            </label>
-
-
-            <input
-              id="adminPassword"
-              name="adminPassword"
-              type="password"
-              [(ngModel)]="password"
-              autocomplete="current-password"
-              placeholder="Ingresa la contraseña"
-              required
-            >
-
-          </div>
-
-
-          <button
-            type="submit"
-            class="btn-login"
-            [disabled]="
-              iniciandoSesion ||
-              !password.trim()
-            "
-          >
-
-            @if (iniciandoSesion) {
-
-              Iniciando sesión...
-
-            } @else {
-
-              Iniciar sesión
-
-            }
-
-          </button>
-
-        </form>
-
-      </div>
-
-    </div>
+    <app-admin-login
+      (loginCorrecto)="
+        loginCorrecto($event)
+      "
+    />
 
   }
 
-
-  <!-- =====================================
-       PANEL ADMINISTRATIVO
-       ===================================== -->
 
   @if (
     !comprobandoSesion &&
     autenticado
     ) {
 
-    <div class="admin-header">
+    <header class="admin-header">
 
       <div>
 
@@ -152,66 +40,32 @@
         </p>
 
         <h1>
-          Gestión de reservas
+          Gestión de Garridos Barber
         </h1>
 
-        <p class="admin-description">
-          Revisa reservas, cancela horas y bloquea horarios manualmente.
-        </p>
-
       </div>
 
 
-      <div class="admin-header-actions">
+      <button
+        type="button"
+        class="btn-cerrar-sesion"
+        (click)="cerrarSesion()"
+        [disabled]="cerrandoSesion"
+      >
 
-        <button
-          type="button"
-          class="btn-secundario"
-          (click)="cargarDatosAdmin()"
-          [disabled]="
-            cargando ||
-            cargandoBloqueos
-          "
-        >
+        @if (cerrandoSesion) {
 
-          @if (
-            cargando ||
-            cargandoBloqueos
-            ) {
+          Cerrando...
 
-            Actualizando...
+        } @else {
 
-          } @else {
+          Cerrar sesión
 
-            Actualizar
+        }
 
-          }
+      </button>
 
-        </button>
-
-
-        <button
-          type="button"
-          class="btn-cerrar-sesion"
-          (click)="cerrarSesion()"
-          [disabled]="cerrandoSesion"
-        >
-
-          @if (cerrandoSesion) {
-
-            Cerrando...
-
-          } @else {
-
-            Cerrar sesión
-
-          }
-
-        </button>
-
-      </div>
-
-    </div>
+    </header>
 
 
     @if (mensaje) {
@@ -236,546 +90,18 @@
     }
 
 
-    <!-- =====================================
-         RESERVAS
-         ===================================== -->
-
-    <section class="admin-card">
-
-      <div class="card-header">
-
-        <div>
-
-          <p class="seccion-kicker">
-            Reservas
-          </p>
-
-          <h2>
-            Horas agendadas
-          </h2>
-
-        </div>
-
-      </div>
-
-
-      @if (cargando) {
-
-        <div class="estado-carga">
-
-          Cargando reservas...
-
-        </div>
-
-      }
-
-
-      @if (
-        !cargando &&
-        reservas.length === 0
-        ) {
-
-        <div class="estado-vacio">
-
-          No hay reservas registradas.
-
-        </div>
-
-      }
-
-
-      @if (
-        !cargando &&
-        reservas.length > 0
-        ) {
-
-        <div class="tabla-wrapper">
-
-          <table class="admin-table">
-
-            <thead>
-
-            <tr>
-
-              <th>
-                ID
-              </th>
-
-              <th>
-                Fecha
-              </th>
-
-              <th>
-                Hora
-              </th>
-
-              <th>
-                Cliente
-              </th>
-
-              <th>
-                Teléfono
-              </th>
-
-              <th>
-                Estado
-              </th>
-
-              <th>
-                Acciones
-              </th>
-
-            </tr>
-
-            </thead>
-
-
-            <tbody>
-
-              @for (
-                reserva of reservas;
-                track reserva.id
-                ) {
-
-                <tr>
-
-                  <td>
-                    #{{ reserva.id }}
-                  </td>
-
-
-                  <td>
-                    {{ formatearFecha(reserva.fecha) }}
-                  </td>
-
-
-                  <td>
-                    {{ reserva.hora }}
-                  </td>
-
-
-                  <td>
-
-                    <strong>
-
-                      {{ reserva.nombre }}
-                      {{ reserva.apellido }}
-
-                    </strong>
-
-                  </td>
-
-
-                  <td>
-                    {{ reserva.telefono }}
-                  </td>
-
-
-                  <td>
-
-                    <span
-                      class="estado"
-                      [class.estado-confirmada]="
-                        reserva.estado === 'confirmada'
-                      "
-                      [class.estado-cancelada]="
-                        reserva.estado === 'cancelada'
-                      "
-                    >
-
-                      {{ reserva.estado }}
-
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    @if (
-                      reserva.estado ===
-                      'confirmada'
-                      ) {
-
-                      <button
-                        type="button"
-                        class="btn-cancelar"
-                        (click)="cancelarReserva(reserva)"
-                        [disabled]="
-                          cancelandoId === reserva.id
-                        "
-                      >
-
-                        @if (
-                          cancelandoId === reserva.id
-                          ) {
-
-                          Cancelando...
-
-                        } @else {
-
-                          Cancelar
-
-                        }
-
-                      </button>
-
-                    }
-
-
-                    @if (
-                      reserva.estado ===
-                      'cancelada'
-                      ) {
-
-                      <span class="sin-acciones">
-
-                        Sin acciones
-
-                      </span>
-
-                    }
-
-                  </td>
-
-                </tr>
-
-              }
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      }
-
-    </section>
-
-
-    <!-- =====================================
-         BLOQUEAR HORARIO
-         ===================================== -->
-
-    <section class="admin-card">
-
-      <div class="card-header">
-
-        <div>
-
-          <p class="seccion-kicker">
-            Disponibilidad
-          </p>
-
-          <h2>
-            Bloquear horario
-          </h2>
-
-          <p class="card-description">
-            Usa esta opción cuando la barbería no pueda recibir reservas en una hora determinada.
-          </p>
-
-        </div>
-
-      </div>
-
-
-      <form
-        class="bloqueo-form"
-        (ngSubmit)="crearBloqueo()"
-      >
-
-        <div class="campo">
-
-          <label
-            for="fechaBloqueo"
-          >
-            Fecha
-          </label>
-
-
-          <input
-            id="fechaBloqueo"
-            name="fechaBloqueo"
-            type="date"
-            [(ngModel)]="fechaBloqueo"
-            [min]="fechaMinima"
-            [max]="fechaMaxima"
-            (change)="cambiarFechaBloqueo()"
-            required
-          >
-
-        </div>
-
-
-        <div class="campo">
-
-          <label
-            for="horaBloqueo"
-          >
-            Hora
-          </label>
-
-
-          <select
-            id="horaBloqueo"
-            name="horaBloqueo"
-            [(ngModel)]="horaBloqueo"
-            [disabled]="!fechaBloqueo"
-            required
-          >
-
-            <option
-              value=""
-              disabled
-            >
-              Selecciona una hora
-            </option>
-
-
-            @for (
-              hora of horariosParaBloqueo;
-              track hora
-              ) {
-
-              <option
-                [value]="hora"
-              >
-
-                {{ hora }}
-
-              </option>
-
-            }
-
-          </select>
-
-        </div>
-
-
-        <div class="campo campo-motivo">
-
-          <label
-            for="motivoBloqueo"
-          >
-            Motivo
-          </label>
-
-
-          <input
-            id="motivoBloqueo"
-            name="motivoBloqueo"
-            type="text"
-            [(ngModel)]="motivoBloqueo"
-            placeholder="Ej: colación, trámite, cierre..."
-            maxlength="100"
-          >
-
-        </div>
-
-
-        <div class="campo campo-boton">
-
-          <button
-            type="submit"
-            class="btn-bloquear"
-            [disabled]="
-              creandoBloqueo ||
-              !fechaBloqueo ||
-              !horaBloqueo
-            "
-          >
-
-            @if (creandoBloqueo) {
-
-              Bloqueando...
-
-            } @else {
-
-              Bloquear horario
-
-            }
-
-          </button>
-
-        </div>
-
-      </form>
-
-    </section>
-
-
-    <!-- =====================================
-         HORARIOS BLOQUEADOS
-         ===================================== -->
-
-    <section class="admin-card">
-
-      <div class="card-header">
-
-        <div>
-
-          <p class="seccion-kicker">
-            Bloqueos
-          </p>
-
-          <h2>
-            Horarios no disponibles
-          </h2>
-
-        </div>
-
-      </div>
-
-
-      @if (cargandoBloqueos) {
-
-        <div class="estado-carga">
-
-          Cargando horarios bloqueados...
-
-        </div>
-
-      }
-
-
-      @if (
-        !cargandoBloqueos &&
-        bloqueos.length === 0
-        ) {
-
-        <div class="estado-vacio">
-
-          No hay horarios bloqueados manualmente.
-
-        </div>
-
-      }
-
-
-      @if (
-        !cargandoBloqueos &&
-        bloqueos.length > 0
-        ) {
-
-        <div class="tabla-wrapper">
-
-          <table class="admin-table">
-
-            <thead>
-
-            <tr>
-
-              <th>
-                ID
-              </th>
-
-              <th>
-                Fecha
-              </th>
-
-              <th>
-                Hora
-              </th>
-
-              <th>
-                Motivo
-              </th>
-
-              <th>
-                Acciones
-              </th>
-
-            </tr>
-
-            </thead>
-
-
-            <tbody>
-
-              @for (
-                bloqueo of bloqueos;
-                track bloqueo.id
-                ) {
-
-                <tr>
-
-                  <td>
-                    #{{ bloqueo.id }}
-                  </td>
-
-
-                  <td>
-                    {{ formatearFecha(bloqueo.fecha) }}
-                  </td>
-
-
-                  <td>
-
-                    <strong>
-                      {{ bloqueo.hora }}
-                    </strong>
-
-                  </td>
-
-
-                  <td>
-
-                    @if (bloqueo.motivo) {
-
-                      {{ bloqueo.motivo }}
-
-                    } @else {
-
-                      <span class="sin-motivo">
-                        Sin motivo
-                      </span>
-
-                    }
-
-                  </td>
-
-
-                  <td>
-
-                    <button
-                      type="button"
-                      class="btn-liberar"
-                      (click)="eliminarBloqueo(bloqueo)"
-                      [disabled]="
-                        eliminandoBloqueoId === bloqueo.id
-                      "
-                    >
-
-                      @if (
-                        eliminandoBloqueoId === bloqueo.id
-                        ) {
-
-                        Liberando...
-
-                      } @else {
-
-                        Liberar
-
-                      }
-
-                    </button>
-
-                  </td>
-
-                </tr>
-
-              }
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      }
-
-    </section>
+    <app-admin-reservas
+      (sesionExpirada)="
+        sesionExpirada()
+      "
+    />
+
+
+    <app-admin-bloqueos
+      (sesionExpirada)="
+        sesionExpirada()
+      "
+    />
 
   }
 
