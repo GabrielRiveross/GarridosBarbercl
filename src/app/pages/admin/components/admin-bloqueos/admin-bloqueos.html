@@ -1,1 +1,323 @@
-<p>admin-bloqueos works!</p>
+<section class="admin-card">
+
+  <div class="card-header">
+
+    <div>
+
+      <p class="seccion-kicker">
+        Disponibilidad
+      </p>
+
+      <h2>
+        Bloquear horario
+      </h2>
+
+      <p class="card-description">
+        Usa esta opción cuando la barbería no pueda recibir reservas en una hora determinada.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  @if (mensaje) {
+
+    <div class="mensaje-exito">
+      {{ mensaje }}
+    </div>
+
+  }
+
+
+  @if (error) {
+
+    <div class="mensaje-error">
+      {{ error }}
+    </div>
+
+  }
+
+
+  <form
+    class="bloqueo-form"
+    (ngSubmit)="crearBloqueo()"
+  >
+
+    <div class="campo">
+
+      <label
+        for="fechaBloqueo"
+      >
+        Fecha
+      </label>
+
+      <input
+        id="fechaBloqueo"
+        name="fechaBloqueo"
+        type="date"
+        [(ngModel)]="fechaBloqueo"
+        [min]="fechaMinima"
+        [max]="fechaMaxima"
+        (change)="cambiarFechaBloqueo()"
+        required
+      >
+
+    </div>
+
+
+    <div class="campo">
+
+      <label
+        for="horaBloqueo"
+      >
+        Hora
+      </label>
+
+      <select
+        id="horaBloqueo"
+        name="horaBloqueo"
+        [(ngModel)]="horaBloqueo"
+        [disabled]="!fechaBloqueo"
+        required
+      >
+
+        <option
+          value=""
+          disabled
+        >
+          Selecciona una hora
+        </option>
+
+        @for (
+          hora of horariosParaBloqueo;
+          track hora
+          ) {
+
+          <option
+            [value]="hora"
+          >
+            {{ hora }}
+          </option>
+
+        }
+
+      </select>
+
+    </div>
+
+
+    <div class="campo campo-motivo">
+
+      <label
+        for="motivoBloqueo"
+      >
+        Motivo
+      </label>
+
+      <input
+        id="motivoBloqueo"
+        name="motivoBloqueo"
+        type="text"
+        [(ngModel)]="motivoBloqueo"
+        placeholder="Ej: colación, trámite, cierre..."
+        maxlength="100"
+      >
+
+    </div>
+
+
+    <div class="campo campo-boton">
+
+      <button
+        type="submit"
+        class="btn-bloquear"
+        [disabled]="
+          creando ||
+          !fechaBloqueo ||
+          !horaBloqueo
+        "
+      >
+
+        @if (creando) {
+
+          Bloqueando...
+
+        } @else {
+
+          Bloquear horario
+
+        }
+
+      </button>
+
+    </div>
+
+  </form>
+
+</section>
+
+
+<section class="admin-card">
+
+  <div class="card-header">
+
+    <div>
+
+      <p class="seccion-kicker">
+        Bloqueos
+      </p>
+
+      <h2>
+        Horarios no disponibles
+      </h2>
+
+    </div>
+
+  </div>
+
+
+  @if (cargando) {
+
+    <div class="estado-carga">
+      Cargando horarios bloqueados...
+    </div>
+
+  }
+
+
+  @if (
+    !cargando &&
+    bloqueos.length === 0
+    ) {
+
+    <div class="estado-vacio">
+      No hay horarios bloqueados manualmente.
+    </div>
+
+  }
+
+
+  @if (
+    !cargando &&
+    bloqueos.length > 0
+    ) {
+
+    <div class="tabla-wrapper">
+
+      <table class="admin-table">
+
+        <thead>
+
+        <tr>
+
+          <th>
+            ID
+          </th>
+
+          <th>
+            Fecha
+          </th>
+
+          <th>
+            Hora
+          </th>
+
+          <th>
+            Motivo
+          </th>
+
+          <th>
+            Acciones
+          </th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          @for (
+            bloqueo of bloqueos;
+            track bloqueo.id
+            ) {
+
+            <tr>
+
+              <td>
+                #{{ bloqueo.id }}
+              </td>
+
+
+              <td>
+                {{ formatearFecha(bloqueo.fecha) }}
+              </td>
+
+
+              <td>
+
+                <strong>
+                  {{ bloqueo.hora }}
+                </strong>
+
+              </td>
+
+
+              <td>
+
+                @if (bloqueo.motivo) {
+
+                  {{ bloqueo.motivo }}
+
+                } @else {
+
+                  <span class="sin-motivo">
+                    Sin motivo
+                  </span>
+
+                }
+
+              </td>
+
+
+              <td>
+
+                <button
+                  type="button"
+                  class="btn-liberar"
+                  (click)="eliminarBloqueo(bloqueo)"
+                  [disabled]="
+                    eliminandoId === bloqueo.id
+                  "
+                >
+
+                  @if (
+                    eliminandoId === bloqueo.id
+                    ) {
+
+                    Liberando...
+
+                  } @else {
+
+                    Liberar
+
+                  }
+
+                </button>
+
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  }
+
+</section>

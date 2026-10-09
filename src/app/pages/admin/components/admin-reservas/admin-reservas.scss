@@ -1,0 +1,306 @@
+.admin-card {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+
+  border:
+    1px solid
+    #292929;
+
+  border-radius: 1rem;
+
+  background:
+    #141414;
+
+  color:
+    #f5f5f5;
+
+  box-shadow:
+    0 8px 30px
+    rgba(0, 0, 0, 0.22);
+}
+
+
+/* ========================================
+   HEADER
+   ======================================== */
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  margin-bottom: 1.5rem;
+}
+
+.card-header h2 {
+  margin: 0;
+}
+
+.seccion-kicker {
+  margin:
+    0 0 0.4rem;
+
+  color:
+    #d4af37;
+
+  font-size:
+    0.8rem;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    0.08em;
+
+  text-transform:
+    uppercase;
+}
+
+
+/* ========================================
+   MENSAJES
+   ======================================== */
+
+.mensaje-exito,
+.mensaje-error {
+  margin-bottom:
+    1.25rem;
+
+  padding:
+    1rem 1.2rem;
+
+  border-radius:
+    0.8rem;
+
+  font-weight:
+    600;
+}
+
+.mensaje-exito {
+  border:
+    1px solid
+    rgba(62, 180, 91, 0.35);
+
+  background:
+    rgba(62, 180, 91, 0.1);
+
+  color:
+    #8ee5a4;
+}
+
+.mensaje-error {
+  border:
+    1px solid
+    rgba(220, 70, 70, 0.35);
+
+  background:
+    rgba(220, 70, 70, 0.1);
+
+  color:
+    #ff9d9d;
+}
+
+
+/* ========================================
+   ESTADOS
+   ======================================== */
+
+.estado-carga,
+.estado-vacio {
+  padding:
+    1.2rem 0;
+
+  color:
+    #a8a8a8;
+}
+
+.sin-acciones {
+  color:
+    #8e8e8e;
+
+  font-size:
+    0.9rem;
+}
+
+
+/* ========================================
+   TABLA
+   ======================================== */
+
+.tabla-wrapper {
+  width:
+    100%;
+
+  overflow-x:
+    auto;
+}
+
+.admin-table {
+  width:
+    100%;
+
+  min-width:
+    760px;
+
+  border-collapse:
+    collapse;
+}
+
+.admin-table th,
+.admin-table td {
+  padding:
+    1rem;
+
+  border-bottom:
+    1px solid
+    #2a2a2a;
+
+  text-align:
+    left;
+
+  vertical-align:
+    middle;
+}
+
+.admin-table th {
+  color:
+    #d4af37;
+
+  font-size:
+    0.78rem;
+
+  letter-spacing:
+    0.06em;
+
+  text-transform:
+    uppercase;
+}
+
+.admin-table td {
+  color:
+    #e5e5e5;
+}
+
+.admin-table tbody tr {
+  transition:
+    background 0.2s ease;
+}
+
+.admin-table tbody tr:hover {
+  background:
+    #191919;
+}
+
+
+/* ========================================
+   ESTADO DE RESERVA
+   ======================================== */
+
+.estado {
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  padding:
+    0.35rem 0.75rem;
+
+  border-radius:
+    999px;
+
+  font-size:
+    0.8rem;
+
+  font-weight:
+    700;
+
+  text-transform:
+    capitalize;
+}
+
+.estado-confirmada {
+  background:
+    rgba(62, 180, 91, 0.14);
+
+  color:
+    #8ee5a4;
+}
+
+.estado-cancelada {
+  background:
+    rgba(220, 70, 70, 0.14);
+
+  color:
+    #ff9696;
+}
+
+
+/* ========================================
+   BOTÓN CANCELAR
+   ======================================== */
+
+.btn-cancelar {
+  padding:
+    0.75rem 1rem;
+
+  border:
+    none;
+
+  border-radius:
+    0.7rem;
+
+  background:
+    rgba(203, 62, 62, 0.14);
+
+  color:
+    #ff9292;
+
+  font:
+    inherit;
+
+  font-weight:
+    700;
+
+  cursor:
+    pointer;
+
+  transition:
+    transform 0.15s ease,
+    background 0.2s ease,
+    opacity 0.15s ease;
+}
+
+.btn-cancelar:hover:not(:disabled) {
+  transform:
+    translateY(-1px);
+
+  background:
+    rgba(203, 62, 62, 0.23);
+}
+
+.btn-cancelar:disabled {
+  opacity:
+    0.5;
+
+  cursor:
+    not-allowed;
+}
+
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (
+max-width: 700px
+) {
+
+  .admin-card {
+    padding:
+      1rem;
+  }
+
+}

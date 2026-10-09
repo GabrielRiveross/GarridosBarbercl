@@ -1,10 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-
   "name": "admingriveros",
-
   "compatibility_date": "2026-10-01",
-
   "main": "./worker/index.ts",
 
   "assets": {
@@ -23,6 +20,16 @@
       "database_id": "ac6de95c-4328-4124-aa35-8312f99cf233"
     }
   ],
+
+  "previews": {
+    "d1_databases": [
+      {
+        "binding": "DB",
+        "database_name": "garridos-barber-db-preview",
+        "database_id": "fd08c658-8ded-4382-b791-eaa17437a7d2"
+      }
+    ]
+  },
 
   "observability": {
     "enabled": true
